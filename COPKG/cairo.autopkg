@@ -1,0 +1,94 @@
+@import "version.inc";
+@import "compat.inc";
+@import "outercurve.inc";
+
+#define { 
+    flavor: "${comp??vc10}"; 
+    arch : "${plat??x86}";
+}
+
+package {
+    name: "cairo[${flavor}]";
+    version: "${package-version}";
+    arch : "${arch}";
+
+    display-name: "Cairo Graphics Library";
+    location: "http://coapp.org/repository/${OutputFilename}";
+
+    feed: "http://coapp.org/repository/packages.atom.xml";
+    publisher: "CoApp Project";
+}
+
+license[MPL11] {
+	license: @"..\COPYING-MPL-1.1";
+	license-url: "http://www.mozilla.org/MPL/1.1/";
+	license-type: "MPL";
+}
+
+license[LGPL21] {
+	license: @"..\COPYING-LGPL-2.1";
+	license-url: "http://www.gnu.org/licenses/lgpl-2.1.html";
+	license-type: "LGPL";
+}
+
+requires {
+    package: "pixman[vc10]-${pixman-dep-version}-x86-${pixman-dep-publickeytoken}";
+    package: "libpng[vc10]-${libpng-dep-version}-x86-${libpng-dep-publickeytoken}";
+}
+
+metadata {  
+    summary: "Cairo Graphics Library";
+    description: @"Cairo is a vector graphics library that can output to many devices and use hardware acceleration in some cases.";
+    author-version : "${author-version}";
+    bug-tracker: "https://github.com/coapp-packages/cairo/issues";
+    stability : "0";
+    licenses : {
+        MPL11,
+		LGPL21
+    };
+}
+
+signing {
+    attributes : {
+        company="Outercurve Foundation",
+        description="Cairo is a vector graphics library that can output to many devices and use hardware acceleration in some cases.",
+        product-name="Cairo",
+        product-version="${package-version}",
+        file-version="${package-version}",
+    };
+
+    replace-signature: true; 
+    include: { 
+        dlls
+    };    
+}
+
+manifest[cairodeps] {
+    // The 'assembly' section lists all items in SxS which need to be referenced.
+    assembly : {
+        "pixman[${flavor}]",
+        "libpng[${flavor}]",
+    };
+
+    // The 'include' section lists files (or sets of files) which will need to
+    //  reference the above assemblies.
+    include : { 
+        dlls
+    };
+}
+
+assembly[cairo[${flavor}]] {
+    include : {
+        dlls
+    };
+}
+
+files[dlls] {
+    root: @"cairo\Release";
+
+    include: {
+        "cairo.dll",
+    };
+
+    trim-path: all;
+};

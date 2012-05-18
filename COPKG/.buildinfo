@@ -37,3 +37,24 @@ x86 {
 release {
 	uses: x86;
 }
+
+test {
+}
+
+package {
+	uses: release;
+
+	build-command: @"
+        cd COPKG
+        autopackage cairo.autopkg || goto failed
+	";
+
+	targets: {
+		@"COPKG\cairo[vc10]-${package-version}-x86.msi",
+	};
+
+	clean-command: @"
+		del COPKG\*.msi
+		del COPKG\*.wixpdb
+	";
+}
