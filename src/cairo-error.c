@@ -61,6 +61,9 @@
  *
  * Return value: the error status.
  **/
+#ifdef _MSC_VER
+__declspec(noinline)
+#endif
 cairo_status_t
 _cairo_error (cairo_status_t status)
 {
