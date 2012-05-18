@@ -1,0 +1,39 @@
+@import "version.inc";
+
+#product-info  {
+    product-name: "cairo";
+    version: "${package-version}";
+    original-source-location: "git://anongit.freedesktop.org/git/cairo";
+    original-source-website: "http://www.cairographics.org/download/";
+    license: "MPL 1.1, LGPL 2.1";
+    packager: "Vincent Povirk <madewokherd@gmail.com>";
+}
+
+x86 {
+	requires: {
+		"pixman-dev[vc10]-${pixman-dep-version}-x86-${pixman-dep-publickeytoken}",
+		"libpng-dev[vc10]-${libpng-dep-version}-x86-${libpng-dep-publickeytoken}",
+	};
+
+	platform: x86;
+	compiler: vc10;
+
+	build-command: @"
+		if ""${BUILT}"" equ ""true"" goto end
+		msbuild /p:Platform=Win32 /p:Configuration=Release COPKG\cairo\cairo.sln
+:end
+	";
+
+	targets: {
+		@"COPKG\cairo\Release\cairo.dll",
+		@"COPKG\cairo\Release\cairo.lib",
+	};
+
+	clean-command: @"
+		msbuild /p:Platform=Win32 /p:Configuration=Release COPKG\cairo\cairo.sln /target:Clean
+	";
+}
+
+release {
+	uses: x86;
+}
