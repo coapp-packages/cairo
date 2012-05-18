@@ -46,11 +46,13 @@ package {
 
 	build-command: @"
         cd COPKG
+        autopackage cairo-dev-common.autopkg || goto failed
         autopackage cairo.autopkg || goto failed
 	";
 
 	targets: {
 		@"COPKG\cairo[vc10]-${package-version}-x86.msi",
+		@"COPKG\cairo-dev-common-${package-version}-any.msi",
 	};
 
 	clean-command: @"

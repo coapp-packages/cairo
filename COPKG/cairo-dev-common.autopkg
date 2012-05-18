@@ -1,0 +1,80 @@
+@import "version.inc";
+@import "compat.inc";
+@import "outercurve.inc";
+
+package {
+    name: "cairo-dev-common";
+    version: "${package-version}";
+    arch : "any";
+
+    display-name: "Cairo Graphics Library-Dev-Common";
+    location: "http://coapp.org/repository/${OutputFilename}";
+
+    feed: "http://coapp.org/repository/packages.atom.xml";
+    publisher: "CoApp Project";
+}
+
+license[MPL11] {
+	license: @"..\COPYING-MPL-1.1";
+	license-url: "http://www.mozilla.org/MPL/1.1/";
+	license-type: "MPL";
+}
+
+license[LGPL21] {
+	license: @"..\COPYING-LGPL-2.1";
+	license-url: "http://www.gnu.org/licenses/lgpl-2.1.html";
+	license-type: "LGPL";
+}
+
+metadata {  
+    summary: "Cairo Graphics Library";
+    description: @"Cairo is a vector graphics library that can output to many devices and use hardware acceleration in some cases.";
+    author-version : "${author-version}";
+    bug-tracker: "https://github.com/coapp-packages/cairo/issues";
+    stability : "0";
+    licenses : {
+        MPL11,
+		LGPL21
+    };
+}
+
+developer-library[cairo] {
+    headers: { 
+        headers,
+		featuresheader,
+		versionheader
+    };
+}
+
+files[headers] {
+    root: @"..\src";
+    include: {
+        "cairo.h",
+		"cairo-deprecated.h",
+		"cairo-ps.h",
+		"cairo-pdf.h",
+		"cairo-svg.h",
+		"cairo-win32.h",
+		"cairo-script.h",
+    };
+
+    trim-path:all;
+}
+
+files[featuresheader] {
+    root: @"cairo";
+    include: {
+        "cairo-features.h",
+    };
+
+    trim-path:all;
+}
+
+files[versionheader] {
+    root: @"..";
+    include: {
+        "cairo-version.h",
+    };
+
+    trim-path:all;
+}
