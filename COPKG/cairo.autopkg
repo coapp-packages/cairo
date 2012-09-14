@@ -1,6 +1,7 @@
 @import "version.inc";
 @import "compat.inc";
 @import "outercurve.inc";
+@import "common.inc";
 
 #define { 
     flavor: "${comp??vc10}"; 
@@ -39,7 +40,7 @@ requires {
 metadata {  
     summary: "Cairo Graphics Library";
     description: @"Cairo is a vector graphics library that can output to many devices and use hardware acceleration in some cases.";
-    author-version : "${author-version}";
+    author-version : "${package-version}";
     bug-tracker: "https://github.com/coapp-packages/cairo/issues";
     stability : "0";
     licenses : {
