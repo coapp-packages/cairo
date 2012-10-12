@@ -390,6 +390,9 @@
     <ClCompile Include="..\..\..\src\cairo-damage.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\cairo-mempool.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cairo-features.h">

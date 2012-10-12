@@ -128,6 +128,7 @@
     <ClCompile Include="..\..\..\src\cairo-lzw.c" />
     <ClCompile Include="..\..\..\src\cairo-mask-compositor.c" />
     <ClCompile Include="..\..\..\src\cairo-matrix.c" />
+    <ClCompile Include="..\..\..\src\cairo-mempool.c" />
     <ClCompile Include="..\..\..\src\cairo-mesh-pattern-rasterizer.c" />
     <ClCompile Include="..\..\..\src\cairo-misc.c" />
     <ClCompile Include="..\..\..\src\cairo-mono-scan-converter.c" />
