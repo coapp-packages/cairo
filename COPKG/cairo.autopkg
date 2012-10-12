@@ -33,9 +33,9 @@ license[LGPL21] {
 }
 
 requires {
-    package: "pixman[vc10]-${pixman-dep-version}-x86-${pixman-dep-publickeytoken}";
-    package: "libpng[vc10]-${libpng-dep-version}-x86-${libpng-dep-publickeytoken}";
-    package: "glib[vc10]-${glib-dep-version}-x86-${glib-dep-publickeytoken}";
+    package: "pixman[${flavor}]-${pixman-dep-version}-x86-${pixman-dep-publickeytoken}";
+    package: "libpng[${flavor}]-${libpng-dep-version}-x86-${libpng-dep-publickeytoken}";
+    package: "glib[${flavor}]-${glib-dep-version}-x86-${glib-dep-publickeytoken}";
 }
 
 metadata {  
