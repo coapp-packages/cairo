@@ -18,7 +18,6 @@ x86 {
 	requires: {
 		"pixman-dev[vc10]-${pixman-dep-version}-x86-${pixman-dep-publickeytoken}",
 		"libpng-dev[vc10]-${libpng-dep-version}-x86-${libpng-dep-publickeytoken}",
-		"glib-dev[vc10]-${glib-dep-version}-x86-${glib-dep-publickeytoken}",
 	};
 
 	platform: x86;

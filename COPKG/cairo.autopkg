@@ -35,7 +35,6 @@ license[LGPL21] {
 requires {
     package: "pixman[${flavor}]-${pixman-dep-version}-x86-${pixman-dep-publickeytoken}";
     package: "libpng[${flavor}]-${libpng-dep-version}-x86-${libpng-dep-publickeytoken}";
-    package: "glib[${flavor}]-${glib-dep-version}-x86-${glib-dep-publickeytoken}";
 }
 
 metadata {  
@@ -70,7 +69,6 @@ manifest[cairodeps] {
     assembly : {
         "pixman[${flavor}]",
         "libpng[${flavor}]",
-        "glib[${flavor}]",
     };
 
     // The 'include' section lists files (or sets of files) which will need to
