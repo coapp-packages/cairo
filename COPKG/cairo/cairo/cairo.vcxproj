@@ -39,12 +39,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir);$(ProgramData)\include\pixman;$(ProgramData)\include\zlib;$(ProgramData)\include\libpng15;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir);$(SolutionDir)..\..\src;$(ProgramData)\include\pixman;$(ProgramData)\include\zlib;$(ProgramData)\include\libpng15;$(ProgramData)\include\glib;$(ProgramData)\include\glib\glib-2.0;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProgramData)\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir);$(SolutionDir)..\..\src;$(ProgramData)\include\pixman;$(ProgramData)\include\zlib;$(ProgramData)\include\libpng15;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir);$(SolutionDir)..\..\src;$(ProgramData)\include\pixman;$(ProgramData)\include\zlib;$(ProgramData)\include\libpng15;$(ProgramData)\include\glib;$(ProgramData)\include\glib\glib-2.0;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProgramData)\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -58,7 +58,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>msimg32.lib;zlib.lib;pixman.lib;libpng15.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>msimg32.lib;zlib.lib;pixman.lib;libpng15.lib;glib-2.0.lib;gobject-2.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -76,7 +76,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>msimg32.lib;zlib.lib;pixman.lib;libpng15.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>msimg32.lib;zlib.lib;pixman.lib;libpng15.lib;glib-2.0.lib;gobject-2.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -206,8 +206,11 @@
     <ClCompile Include="..\..\..\src\win32\cairo-win32-printing-surface.c" />
     <ClCompile Include="..\..\..\src\win32\cairo-win32-surface.c" />
     <ClCompile Include="..\..\..\src\win32\cairo-win32-system.c" />
+    <ClCompile Include="..\..\..\util\cairo-gobject\cairo-gobject-enums.c" />
+    <ClCompile Include="..\..\..\util\cairo-gobject\cairo-gobject-structs.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\util\cairo-gobject\cairo-gobject.h" />
     <ClInclude Include="..\cairo-features.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

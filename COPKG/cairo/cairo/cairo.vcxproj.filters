@@ -393,9 +393,18 @@
     <ClCompile Include="..\..\..\src\cairo-mempool.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\util\cairo-gobject\cairo-gobject-enums.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\util\cairo-gobject\cairo-gobject-structs.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cairo-features.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\util\cairo-gobject\cairo-gobject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
