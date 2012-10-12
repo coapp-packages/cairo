@@ -35,6 +35,7 @@ license[LGPL21] {
 requires {
     package: "cairo[${flavor}]-${package-version}-x86-${Package.PublicKeyToken}";
     package: "cairo-dev-common-${package-version}-any-${Package.PublicKeyToken}";
+    package: "glib-dev[${flavor}]-${glib-dep-version}-x86-${glib-dep-publickeytoken}";
 }
 
 metadata {  

@@ -43,7 +43,8 @@ developer-library[cairo] {
     headers: { 
         headers,
 		featuresheader,
-		versionheader
+		versionheader,
+		glibheader
     };
 }
 
@@ -75,6 +76,15 @@ files[versionheader] {
     root: @"..";
     include: {
         "cairo-version.h",
+    };
+
+    trim-path:all;
+}
+
+files[glibheader] {
+    root: @"..\util\cairo-gobject";
+    include: {
+        "cairo-gobject.h",
     };
 
     trim-path:all;
