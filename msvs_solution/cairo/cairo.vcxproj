@@ -29,27 +29,27 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -266,11 +266,6 @@
     <ClCompile Include="..\..\src\win32\cairo-win32-system.c" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\pixman\msvs_solution\pixman\pixman.vcxproj">
-      <Project>{acef1d7d-53fb-4f94-b8e3-b043786708e2}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -282,6 +277,7 @@
     <Import Project="..\..\..\svgren\msvs_solution\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets" Condition="Exists('..\..\..\svgren\msvs_solution\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" />
     <Import Project="..\..\..\svgren\msvs_solution\packages\libpng.redist.1.6.18.1\build\native\libpng.redist.targets" Condition="Exists('..\..\..\svgren\msvs_solution\packages\libpng.redist.1.6.18.1\build\native\libpng.redist.targets')" />
     <Import Project="..\..\..\svgren\msvs_solution\packages\libpng.1.6.18.1\build\native\libpng.targets" Condition="Exists('..\..\..\svgren\msvs_solution\packages\libpng.1.6.18.1\build\native\libpng.targets')" />
+    <Import Project="..\..\..\svgren\msvs_solution\packages\pixman_static.0.32.4.1\build\native\pixman_static.targets" Condition="Exists('..\..\..\svgren\msvs_solution\packages\pixman_static.0.32.4.1\build\native\pixman_static.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -291,5 +287,6 @@
     <Error Condition="!Exists('..\..\..\svgren\msvs_solution\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\svgren\msvs_solution\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets'))" />
     <Error Condition="!Exists('..\..\..\svgren\msvs_solution\packages\libpng.redist.1.6.18.1\build\native\libpng.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\svgren\msvs_solution\packages\libpng.redist.1.6.18.1\build\native\libpng.redist.targets'))" />
     <Error Condition="!Exists('..\..\..\svgren\msvs_solution\packages\libpng.1.6.18.1\build\native\libpng.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\svgren\msvs_solution\packages\libpng.1.6.18.1\build\native\libpng.targets'))" />
+    <Error Condition="!Exists('..\..\..\svgren\msvs_solution\packages\pixman_static.0.32.4.1\build\native\pixman_static.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\svgren\msvs_solution\packages\pixman_static.0.32.4.1\build\native\pixman_static.targets'))" />
   </Target>
 </Project>
