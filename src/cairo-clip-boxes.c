@@ -497,12 +497,12 @@ _reduce_move_to (void *closure,
 static cairo_clip_t *
 _cairo_clip_reduce_to_boxes (cairo_clip_t *clip)
 {
-    struct reduce r;
+/*    struct reduce r;
     cairo_clip_path_t *clip_path;
     cairo_status_t status;
-
+*/
 	return clip;
-    if (clip->path == NULL)
+/*    if (clip->path == NULL)
 	return clip;
 
     r.clip = clip;
@@ -536,7 +536,7 @@ _cairo_clip_reduce_to_boxes (cairo_clip_t *clip)
 	clip->path = NULL;
     }
 
-    return _cairo_clip_intersect_box (clip, &r.extents);
+    return _cairo_clip_intersect_box (clip, &r.extents);*/
 }
 
 cairo_clip_t *

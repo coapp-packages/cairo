@@ -1,0 +1,6 @@
+xcodeproj 'tests.xcodeproj'
+
+source 'https://github.com/igagis/cocoapods-repo.git'
+
+pod 'libpixman', '>= 0.32.4'
+

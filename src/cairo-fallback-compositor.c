@@ -58,7 +58,7 @@ _cairo_fallback_compositor_paint (const cairo_compositor_t	*_compositor,
 
     image = _cairo_surface_map_to_image (extents->surface, &extents->unbounded);
 
-    status = _cairo_surface_offset_paint (&image->base,
+    status = (cairo_int_status_t)_cairo_surface_offset_paint (&image->base,
 					  extents->unbounded.x,
 					  extents->unbounded.y,
 					  extents->op,
@@ -79,7 +79,7 @@ _cairo_fallback_compositor_mask (const cairo_compositor_t	*_compositor,
 
     image = _cairo_surface_map_to_image (extents->surface, &extents->unbounded);
 
-    status = _cairo_surface_offset_mask (&image->base,
+    status = (cairo_int_status_t)_cairo_surface_offset_mask (&image->base,
 					 extents->unbounded.x,
 					 extents->unbounded.y,
 					 extents->op,
@@ -107,7 +107,7 @@ _cairo_fallback_compositor_stroke (const cairo_compositor_t	*_compositor,
 
     image = _cairo_surface_map_to_image (extents->surface, &extents->unbounded);
 
-    status = _cairo_surface_offset_stroke (&image->base,
+    status = (cairo_int_status_t)_cairo_surface_offset_stroke (&image->base,
 					   extents->unbounded.x,
 					   extents->unbounded.y,
 					   extents->op,

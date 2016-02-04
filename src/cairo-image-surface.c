@@ -196,10 +196,10 @@ _pixman_format_from_masks (cairo_format_masks_t *masks,
     int a, r, g, b;
     cairo_format_masks_t format_masks;
 
-    a = _cairo_popcount (masks->alpha_mask);
-    r = _cairo_popcount (masks->red_mask);
-    g = _cairo_popcount (masks->green_mask);
-    b = _cairo_popcount (masks->blue_mask);
+    a = _cairo_popcount ((uint32_t)masks->alpha_mask);
+    r = _cairo_popcount ((uint32_t)masks->red_mask);
+    g = _cairo_popcount ((uint32_t)masks->green_mask);
+    b = _cairo_popcount ((uint32_t)masks->blue_mask);
 
     if (masks->red_mask) {
 	if (masks->red_mask > masks->blue_mask)

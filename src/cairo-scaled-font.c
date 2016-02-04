@@ -238,8 +238,8 @@ static const cairo_scaled_font_t _cairo_scaled_font_nil = {
     { 1., 0., 0., 1., 0, 0},	/* ctm */
     { CAIRO_ANTIALIAS_DEFAULT,	/* options */
       CAIRO_SUBPIXEL_ORDER_DEFAULT,
-      CAIRO_HINT_STYLE_DEFAULT,
-      CAIRO_HINT_METRICS_DEFAULT} ,
+      (cairo_lcd_filter_t)CAIRO_HINT_STYLE_DEFAULT,
+      (cairo_hint_style_t)CAIRO_HINT_METRICS_DEFAULT} ,
     FALSE,			/* placeholder */
     FALSE,			/* holdover */
     TRUE,			/* finished */

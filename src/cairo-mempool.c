@@ -133,7 +133,7 @@ free_blocks (cairo_mempool_t *pool,
 	    if (i & (next_len - 1)) /* block would not be on boundary */
 	        break;
 
-	    bits = next_bits;
+	    bits = (int)next_bits;
 	    len = next_len;
 	}
 

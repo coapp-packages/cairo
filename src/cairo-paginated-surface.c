@@ -186,7 +186,7 @@ _cairo_paginated_surface_set_size (cairo_surface_t	*surface,
 									   &recording_extents);
     status = paginated_surface->recording_surface->status;
     if (unlikely (status))
-	return _cairo_surface_set_error (surface, status);
+	return (cairo_status_t)_cairo_surface_set_error (surface, (cairo_int_status_t)status);
 
     return CAIRO_STATUS_SUCCESS;
 }
@@ -201,7 +201,7 @@ _cairo_paginated_surface_finish (void *abstract_surface)
 	/* Bypass some of the sanity checking in cairo-surface.c, as we
 	 * know that the surface is finished...
 	 */
-	status = _cairo_paginated_surface_show_page (surface);
+	status = (cairo_status_t)_cairo_paginated_surface_show_page (surface);
     }
 
      /* XXX We want to propagate any errors from destroy(), but those are not
@@ -263,7 +263,7 @@ _cairo_paginated_surface_acquire_source_image (void	       *abstract_surface,
 
     is_bounded = _cairo_surface_get_extents (surface->target, &extents);
     if (! is_bounded)
-	return CAIRO_INT_STATUS_UNSUPPORTED;
+	return (cairo_status_t)CAIRO_INT_STATUS_UNSUPPORTED;
 
     image = _cairo_paginated_surface_create_image_surface (surface,
 							   extents.width,
@@ -334,7 +334,7 @@ _paint_fallback_image (cairo_paginated_surface_t *surface,
 CLEANUP_IMAGE:
     cairo_surface_destroy (image);
 
-    return status;
+    return (cairo_int_status_t)status;
 }
 
 static cairo_int_status_t

@@ -480,7 +480,7 @@ floored_muldivrem(int x, int a, int b)
 {
     struct quorem qr;
     long long xa = (long long)x*a;
-    qr.quo = xa/b;
+    qr.quo = (int32_t)(xa/b);
     qr.rem = xa%b;
     if ((xa>=0) != (b>=0) && qr.rem) {
 	qr.quo -= 1;
@@ -1497,14 +1497,19 @@ glitter_scan_converter_add_edge (glitter_scan_converter_t *converter,
 {
     cairo_edge_t e;
 
-    INPUT_TO_GRID_Y (edge->top, e.top);
-    INPUT_TO_GRID_Y (edge->bottom, e.bottom);
+	long long tmp;
+    INPUT_TO_GRID_Y (edge->top, tmp);
+	e.top = (int)tmp;
+    INPUT_TO_GRID_Y (edge->bottom, tmp);
+	e.bottom = (int)tmp;
     if (e.top >= e.bottom)
 	return;
 
     /* XXX: possible overflows if GRID_X/Y > 2**GLITTER_INPUT_BITS */
-    INPUT_TO_GRID_Y (edge->line.p1.y, e.line.p1.y);
-    INPUT_TO_GRID_Y (edge->line.p2.y, e.line.p2.y);
+    INPUT_TO_GRID_Y (edge->line.p1.y, tmp);
+	e.line.p1.y = (cairo_fixed_t)tmp;
+    INPUT_TO_GRID_Y (edge->line.p2.y, tmp);
+	e.line.p2.y = (cairo_fixed_t)tmp;
     if (e.line.p1.y == e.line.p2.y)
 	e.line.p2.y++; /* little fudge to prevent a div-by-zero */
 

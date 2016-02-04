@@ -869,7 +869,7 @@ _cairo_intern_string (const char **str_inout, int len)
 	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 
     if (len < 0)
-	len = strlen (str);
+	len = (int)strlen (str);
     tmpl.hash_entry.hash = _intern_string_hash (str, len);
     tmpl.len = len;
     tmpl.string = (char *) str;

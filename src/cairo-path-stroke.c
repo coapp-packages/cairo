@@ -228,7 +228,7 @@ _tessellate_fan (cairo_stroker_t *stroker,
     cairo_point_t stack_points[64], *points = stack_points;
     cairo_pen_t *pen = &stroker->pen;
     int start, stop, num_points = 0;
-    cairo_status_t status;
+    cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
     if (stroker->has_bounds &&
 	! _cairo_box_contains_point (&stroker->bounds, midpt))
@@ -1352,7 +1352,7 @@ _cairo_path_fixed_stroke_to_traps (const cairo_path_fixed_t	*path,
     cairo_polygon_t polygon;
 
     _cairo_polygon_init (&polygon, traps->limits, traps->num_limits);
-    status = _cairo_path_fixed_stroke_to_polygon (path,
+    status = (cairo_int_status_t)_cairo_path_fixed_stroke_to_polygon (path,
 						  stroke_style,
 						  ctm,
 						  ctm_inverse,
@@ -1361,11 +1361,11 @@ _cairo_path_fixed_stroke_to_traps (const cairo_path_fixed_t	*path,
     if (unlikely (status))
 	goto BAIL;
 
-    status = _cairo_polygon_status (&polygon);
+    status = (cairo_int_status_t)_cairo_polygon_status (&polygon);
     if (unlikely (status))
 	goto BAIL;
 
-    status = _cairo_bentley_ottmann_tessellate_polygon (traps, &polygon,
+    status = (cairo_int_status_t)_cairo_bentley_ottmann_tessellate_polygon (traps, &polygon,
 							CAIRO_FILL_RULE_WINDING);
 
 BAIL:

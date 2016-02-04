@@ -58,7 +58,7 @@ static const cairo_surface_backend_t _cairo_surface_observer_backend;
 
 /* observation/stats */
 
-static void init_stats (struct stat *s)
+static void init_stats (struct cairo_stat *s)
 {
     s->min = HUGE_VAL;
     s->max = -HUGE_VAL;
@@ -261,7 +261,7 @@ add_clip (struct clip *stats,
 }
 
 static void
-stats_add (struct stat *s, double v)
+stats_add (struct cairo_stat *s, double v)
 {
     if (v < s->min)
 	s->min = v;
@@ -331,7 +331,7 @@ _cairo_device_observer_destroy (void *_device)
 }
 
 static const cairo_device_backend_t _cairo_device_observer_backend = {
-    CAIRO_INTERNAL_DEVICE_TYPE_OBSERVER,
+    (cairo_device_type_t)CAIRO_INTERNAL_DEVICE_TYPE_OBSERVER,
 
     _cairo_device_observer_lock,
     _cairo_device_observer_unlock,
@@ -648,7 +648,7 @@ add_record (cairo_observation_t *log,
 
     r->index = log->record ? log->record->commands.num_elements : 0;
 
-    status = _cairo_array_append (&log->timings, r);
+    status = (cairo_int_status_t)_cairo_array_append (&log->timings, r);
     assert (status == CAIRO_INT_STATUS_SUCCESS);
 }
 

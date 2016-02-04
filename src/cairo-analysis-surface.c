@@ -108,7 +108,7 @@ proxy_finish (void *abstract_surface)
 }
 
 static const cairo_surface_backend_t proxy_backend  = {
-    CAIRO_INTERNAL_SURFACE_TYPE_NULL,
+    (cairo_surface_type_t)CAIRO_INTERNAL_SURFACE_TYPE_NULL,
     proxy_finish,
 };
 
@@ -155,13 +155,13 @@ _analyze_recording_surface_pattern (cairo_analysis_surface_t *surface,
     proxy = _cairo_surface_has_snapshot (source, &proxy_backend);
     if (proxy != NULL) {
 	/* nothing untoward found so far */
-	return CAIRO_STATUS_SUCCESS;
+	return (cairo_int_status_t)CAIRO_STATUS_SUCCESS;
     }
 
     tmp = (cairo_analysis_surface_t *)
 	_cairo_analysis_surface_create (surface->target);
     if (unlikely (tmp->base.status))
-	return tmp->base.status;
+	return (cairo_int_status_t)tmp->base.status;
     proxy = attach_proxy (source, &tmp->base);
 
     p2d = pattern->matrix;
@@ -174,14 +174,14 @@ _analyze_recording_surface_pattern (cairo_analysis_surface_t *surface,
     source = _cairo_surface_get_source (source, NULL);
     status = _cairo_recording_surface_replay_and_create_regions (source,
 								 &tmp->base);
-    analysis_status = tmp->has_unsupported ? CAIRO_INT_STATUS_IMAGE_FALLBACK : CAIRO_INT_STATUS_SUCCESS;
+    analysis_status = tmp->has_unsupported ? (cairo_status_t)CAIRO_INT_STATUS_IMAGE_FALLBACK : (cairo_status_t)CAIRO_INT_STATUS_SUCCESS;
     detach_proxy (proxy);
     cairo_surface_destroy (&tmp->base);
 
     if (unlikely (status))
-	return status;
+	return (cairo_int_status_t)status;
 
-    return analysis_status;
+    return (cairo_int_status_t)analysis_status;
 }
 
 static cairo_int_status_t

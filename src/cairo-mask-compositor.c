@@ -172,7 +172,7 @@ create_composite_mask (const cairo_mask_compositor_t *compositor,
     status = compositor->acquire (surface);
     if (unlikely (status)) {
 	cairo_surface_destroy (surface);
-	return _cairo_surface_create_in_error (status);
+	return _cairo_surface_create_in_error ((cairo_status_t)status);
     }
 
     if (!surface->is_clear) {
@@ -223,7 +223,7 @@ create_composite_mask (const cairo_mask_compositor_t *compositor,
     }
 
     if (extents->clip->path != NULL) {
-	status = _cairo_clip_combine_with_surface (extents->clip, surface,
+	status = (cairo_int_status_t)_cairo_clip_combine_with_surface (extents->clip, surface,
 						   extents->bounded.x,
 						   extents->bounded.y);
 	if (unlikely (status))
@@ -239,7 +239,7 @@ error:
     compositor->release (surface);
     if (status != CAIRO_INT_STATUS_NOTHING_TO_DO) {
 	cairo_surface_destroy (surface);
-	surface = _cairo_surface_create_in_error (status);
+	surface = _cairo_surface_create_in_error ((cairo_status_t)status);
     }
     return surface;
 }

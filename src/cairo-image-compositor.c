@@ -61,13 +61,13 @@ to_pixman_image (cairo_surface_t *s)
 static cairo_int_status_t
 acquire (void *abstract_dst)
 {
-    return CAIRO_STATUS_SUCCESS;
+    return (cairo_int_status_t)CAIRO_STATUS_SUCCESS;
 }
 
 static cairo_int_status_t
 release (void *abstract_dst)
 {
-    return CAIRO_STATUS_SUCCESS;
+    return (cairo_int_status_t)CAIRO_STATUS_SUCCESS;
 }
 
 static cairo_int_status_t
@@ -78,9 +78,9 @@ set_clip_region (void *_surface,
     pixman_region32_t *rgn = region ? &region->rgn : NULL;
 
     if (! pixman_image_set_clip_region32 (surface->pixman_image, rgn))
-	return _cairo_error (CAIRO_STATUS_NO_MEMORY);
+	return (cairo_int_status_t)_cairo_error (CAIRO_STATUS_NO_MEMORY);
 
-    return CAIRO_STATUS_SUCCESS;
+    return (cairo_int_status_t)CAIRO_STATUS_SUCCESS;
 }
 
 static cairo_int_status_t

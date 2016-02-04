@@ -325,7 +325,7 @@ _lzw_symbol_table_lookup (lzw_symbol_table_t	 *table,
 unsigned char *
 _cairo_lzw_compress (unsigned char *data, unsigned long *size_in_out)
 {
-    int bytes_remaining = *size_in_out;
+    int bytes_remaining = (int)*size_in_out;
     lzw_buf_t buf;
     lzw_symbol_table_t table;
     lzw_symbol_t symbol, *slot = NULL; /* just to squelch a warning */
@@ -336,7 +336,7 @@ _cairo_lzw_compress (unsigned char *data, unsigned long *size_in_out)
     if (*size_in_out == 0)
 	return NULL;
 
-    _lzw_buf_init (&buf, *size_in_out);
+    _lzw_buf_init (&buf, (int)*size_in_out);
 
     _lzw_symbol_table_init (&table);
 

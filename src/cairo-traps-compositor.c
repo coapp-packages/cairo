@@ -165,7 +165,7 @@ add_rect_with_offset (cairo_boxes_t *boxes, int x1, int y1, int x2, int y2, int 
     box.p2.x = _cairo_fixed_from_int (x2 - dx);
     box.p2.y = _cairo_fixed_from_int (y2 - dy);
 
-    status = _cairo_boxes_add (boxes, CAIRO_ANTIALIAS_DEFAULT, &box);
+    status = (cairo_int_status_t)_cairo_boxes_add (boxes, CAIRO_ANTIALIAS_DEFAULT, &box);
     assert (status == CAIRO_INT_STATUS_SUCCESS);
 }
 
@@ -193,7 +193,7 @@ combine_clip_as_traps (const cairo_traps_compositor_t *compositor,
 	return status;
 
     _cairo_traps_init (&traps);
-    status = _cairo_bentley_ottmann_tessellate_polygon (&traps,
+    status = (cairo_int_status_t)_cairo_bentley_ottmann_tessellate_polygon (&traps,
 							&polygon,
 							fill_rule);
     _cairo_polygon_fini (&polygon);
@@ -205,7 +205,7 @@ combine_clip_as_traps (const cairo_traps_compositor_t *compositor,
 					  &src_x, &src_y);
     if (unlikely (src->status)) {
 	_cairo_traps_fini (&traps);
-	return src->status;
+	return (cairo_int_status_t)src->status;
     }
 
     status = compositor->composite_traps (mask, CAIRO_OPERATOR_IN, src,

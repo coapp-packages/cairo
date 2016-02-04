@@ -209,7 +209,7 @@ _cairo_int64_32_div (cairo_int64_t num, int32_t den)
     return _cairo_int64_to_int32
 	(_cairo_int64_divrem (num, _cairo_int32_to_int64 (den)).quo);
 #else
-    return num / den;
+    return (int32_t)(num / den);
 #endif
 }
 

@@ -526,7 +526,7 @@ proxy_finish (void *abstract_surface)
 }
 
 static const cairo_surface_backend_t proxy_backend  = {
-    CAIRO_INTERNAL_SURFACE_TYPE_NULL,
+    (cairo_surface_type_t)CAIRO_INTERNAL_SURFACE_TYPE_NULL,
     proxy_finish,
     NULL,
 

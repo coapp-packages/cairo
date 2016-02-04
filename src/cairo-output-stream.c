@@ -265,7 +265,7 @@ _cairo_output_stream_write (cairo_output_stream_t *stream,
     if (stream->status)
 	return;
 
-    stream->status = stream->write_func (stream, data, length);
+    stream->status = stream->write_func (stream, data, (unsigned)length);
     stream->position += length;
 }
 
@@ -316,7 +316,7 @@ _cairo_dtostr (char *buffer, size_t size, double d, cairo_bool_t limited_precisi
 
     locale_data = localeconv ();
     decimal_point = locale_data->decimal_point;
-    decimal_point_len = strlen (decimal_point);
+    decimal_point_len = (int)strlen (decimal_point);
 
     assert (decimal_point_len != 0);
 

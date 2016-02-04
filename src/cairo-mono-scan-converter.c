@@ -107,7 +107,7 @@ floored_muldivrem(int x, int a, int b)
 {
     struct quorem qr;
     long long xa = (long long)x*a;
-    qr.quo = xa/b;
+    qr.quo = (int32_t)(xa/b);
     qr.rem = xa%b;
     if ((xa>=0) != (b>=0) && qr.rem) {
 	qr.quo -= 1;

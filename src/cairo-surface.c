@@ -153,8 +153,8 @@ static DEFINE_NIL_SURFACE(CAIRO_STATUS_INVALID_SIZE, _cairo_surface_nil_invalid_
 static DEFINE_NIL_SURFACE(CAIRO_STATUS_DEVICE_TYPE_MISMATCH, _cairo_surface_nil_device_type_mismatch);
 static DEFINE_NIL_SURFACE(CAIRO_STATUS_DEVICE_ERROR, _cairo_surface_nil_device_error);
 
-static DEFINE_NIL_SURFACE(CAIRO_INT_STATUS_UNSUPPORTED, _cairo_surface_nil_unsupported);
-static DEFINE_NIL_SURFACE(CAIRO_INT_STATUS_NOTHING_TO_DO, _cairo_surface_nil_nothing_to_do);
+static DEFINE_NIL_SURFACE((cairo_status_t)CAIRO_INT_STATUS_UNSUPPORTED, _cairo_surface_nil_unsupported);
+static DEFINE_NIL_SURFACE((cairo_status_t)CAIRO_INT_STATUS_NOTHING_TO_DO, _cairo_surface_nil_nothing_to_do);
 
 static void _cairo_surface_finish_snapshots (cairo_surface_t *surface);
 static void _cairo_surface_finish (cairo_surface_t *surface);
@@ -197,7 +197,7 @@ _cairo_surface_set_error (cairo_surface_t *surface,
      * error, which is the most significant. */
     _cairo_status_set_error (&surface->status, (cairo_status_t)status);
 
-    return _cairo_error (status);
+    return (cairo_int_status_t)_cairo_error ((cairo_status_t)status);
 }
 
 /**

@@ -1235,7 +1235,7 @@ _cairo_gstate_in_stroke (cairo_gstate_t	    *gstate,
     _cairo_traps_init (&traps);
     _cairo_traps_limit (&traps, &limit, 1);
 
-    status = _cairo_path_fixed_stroke_to_traps (path,
+    status = (cairo_status_t)_cairo_path_fixed_stroke_to_traps (path,
 						&gstate->stroke_style,
 						&gstate->ctm,
 						&gstate->ctm_inverse,
@@ -1431,7 +1431,7 @@ _cairo_gstate_stroke_extents (cairo_gstate_t	 *gstate,
 {
     cairo_int_status_t status;
     cairo_box_t extents;
-    cairo_bool_t empty;
+    cairo_bool_t empty = 0;
 
     if (x1)
 	*x1 = 0.0;

@@ -526,7 +526,7 @@ edges_compare_x_for_y (const cairo_bo_edge_t *a,
        HAVE_BX      = 0x2,
        HAVE_BOTH    = HAVE_AX | HAVE_BX
     } have_ax_bx = HAVE_BOTH;
-    int32_t ax, bx;
+    int32_t ax = 0, bx = 0;
 
     if (y == a->edge.line.p1.y)
 	ax = a->edge.line.p1.x;
@@ -884,7 +884,7 @@ cairo_bo_event_compare (const cairo_bo_event_t *a,
     if (cmp)
 	return cmp;
 
-    return a - b;
+    return (int)(a - b);
 }
 
 static inline void
@@ -1691,7 +1691,7 @@ _cairo_bentley_ottmann_tessellate_polygon (cairo_traps_t	 *traps,
     cairo_bo_event_t **event_ptrs;
     cairo_bo_start_event_t *stack_event_y[64];
     cairo_bo_start_event_t **event_y = NULL;
-    int i, num_events, y, ymin, ymax;
+    int i, num_events, y, ymin, ymax = 0;
     cairo_status_t status;
 
     num_events = polygon->num_edges;
