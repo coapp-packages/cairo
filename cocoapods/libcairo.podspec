@@ -7,7 +7,7 @@ Pod::Spec.new do |s|
   s.author       = { "Cairo authors" => "cairographics.org" }
   s.platform     = :ios, "7.0"
 
-  s.compiler_flags = '-DCAIRO_NO_MUTEX=1 -DHAVE_STDINT_H -DHAVE_UINT64_T'
+  s.compiler_flags = '-DCAIRO_NO_MUTEX=1 -DHAVE_STDINT_H -DHAVE_UINT64_T -Wno-enum-conversion'
   
   s.source = { :git => "https://github.com/igagis/cairo.git", :tag => s.version }
 

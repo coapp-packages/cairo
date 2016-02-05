@@ -3382,7 +3382,7 @@ cairo_show_text_glyphs (cairo_t			   *cr,
 
     /* A -1 for utf8_len means NUL-terminated */
     if (utf8_len == -1)
-	utf8_len = strlen (utf8);
+	utf8_len = (int)strlen (utf8);
 
     /* Apart from that, no negatives */
     if (num_glyphs < 0 || utf8_len < 0 || num_clusters < 0) {
