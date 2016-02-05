@@ -560,7 +560,7 @@ _cairo_surface_subsurface_set_snapshot (cairo_surface_t *surface,
      * is fixed.
      */
     return;
-
+/*
     if (ss->snapshot)
 	_cairo_surface_detach_snapshot (ss->snapshot);
 
@@ -568,4 +568,4 @@ _cairo_surface_subsurface_set_snapshot (cairo_surface_t *surface,
 
     _cairo_surface_attach_snapshot (ss->target, &ss->base,
 				    _cairo_surface_subsurface_detach_snapshot);
-}
+*/}

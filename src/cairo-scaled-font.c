@@ -1953,7 +1953,7 @@ cairo_scaled_font_text_to_glyphs (cairo_scaled_font_t   *scaled_font,
 
     /* A -1 for utf8_len means NUL-terminated */
     if (utf8_len == -1)
-	utf8_len = strlen (utf8);
+	utf8_len = (int)strlen (utf8);
 
     /* A NULL *glyphs means no prealloced glyphs array */
     if (glyphs && *glyphs == NULL)

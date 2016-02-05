@@ -1691,7 +1691,7 @@ _cairo_bentley_ottmann_tessellate_polygon (cairo_traps_t	 *traps,
     cairo_bo_event_t **event_ptrs;
     cairo_bo_start_event_t *stack_event_y[64];
     cairo_bo_start_event_t **event_y = NULL;
-    int i, num_events, y, ymin, ymax = 0;
+    int i, num_events, y, ymin = 0, ymax = 0;
     cairo_status_t status;
 
     num_events = polygon->num_edges;

@@ -3217,7 +3217,7 @@ cairo_show_text (cairo_t *cr, const char *utf8)
 	return;
     }
 
-    utf8_len = strlen (utf8);
+    utf8_len = (int)strlen (utf8);
 
     has_show_text_glyphs =
 	cairo_surface_has_show_text_glyphs (cairo_get_target (cr));

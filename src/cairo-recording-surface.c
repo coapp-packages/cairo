@@ -1590,7 +1590,7 @@ _cairo_recording_surface_get_visible_commands (cairo_recording_surface_t *surfac
 
     indices = surface->indices;
     bbtree_foreach_mark_visible (&surface->bbtree, &box, &indices);
-    num_visible = indices - surface->indices;
+    num_visible = (int)(indices - surface->indices);
     if (num_visible > 1)
 	sort_indices (surface->indices, num_visible);
 

@@ -1578,7 +1578,7 @@ _cairo_image_spans (void *abstract_renderer,
 	spans++;
     } while (--num_spans > 1);
 
-    len = row - mask;
+    len = (int)(row - mask);
     row = mask;
     while (--height) {
 	mask += r->u.mask.stride;

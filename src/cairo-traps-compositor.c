@@ -2116,9 +2116,9 @@ _cairo_traps_compositor_stroke (const cairo_compositor_t *_compositor,
 	    status = clip_and_composite_boxes (compositor, extents, &boxes);
 	_cairo_boxes_fini (&boxes);
     }
-
+/*
     if (status == CAIRO_INT_STATUS_UNSUPPORTED && 0 &&
-	_cairo_clip_is_region (extents->clip)) /* XXX */
+	_cairo_clip_is_region (extents->clip))
     {
 	composite_tristrip_info_t info;
 
@@ -2131,7 +2131,7 @@ _cairo_traps_compositor_stroke (const cairo_compositor_t *_compositor,
 	if (likely (status == CAIRO_INT_STATUS_SUCCESS))
 	    status = clip_and_composite_tristrip (compositor, extents, &info);
 	_cairo_tristrip_fini (&info.strip);
-    }
+    }*/
 
     if (status == CAIRO_INT_STATUS_UNSUPPORTED &&
 	path->has_curve_to && antialias == CAIRO_ANTIALIAS_NONE) {
