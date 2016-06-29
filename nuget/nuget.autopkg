@@ -1,7 +1,7 @@
 nuget{
 	nuspec{
 		id = cairo_static;
-		version : 1.12.8.1; //increase this trailing number if this file has changed to generate a new version of the NuGet package
+		version : 1.12.8.2; //increase this trailing number if this file has changed to generate a new version of the NuGet package
 		title: Cairo static library;
 		authors: {Cairo authors};
 		owners: {Ivan Gagis};
@@ -31,25 +31,25 @@ nuget{
 		
 		[x86,release] { 
 			lib: ..\msvs_solution\Release\cairo.lib;
-//			symbols: ..\msvs_solution\Release\cairo.pdb;
+			symbols: ..\msvs_solution\cairo\Release\cairo.pdb;
 //			bin: ..\msvs_solution\Release\cairo.dll;
 		}
 
 		[x86,debug] { 
 			lib: ..\msvs_solution\Debug\cairo.lib;
-//			symbols: ..\msvs_solution\Debug\cairo.pdb;
+			symbols: ..\msvs_solution\cairo\Debug\cairo.pdb;
 //			bin: ..\msvs_solution\Debug\cairo.dll;
 		}
 
 		[x64,release] { 
 			lib: ..\msvs_solution\x64\Release\cairo.lib;
-//			symbols: ..\msvs_solution\x64\Release\cairo.pdb;
+			symbols: ..\msvs_solution\cairo\x64\Release\cairo.pdb;
 //			bin: ..\msvs_solution\x64\Release\cairo.dll;
 		}
 
 		[x64,debug] { 
 			lib: ..\msvs_solution\x64\Debug\cairo.lib;
-//			symbols: ..\msvs_solution\x64\Debug\cairo.pdb;
+			symbols: ..\msvs_solution\cairo\x64\Debug\cairo.pdb;
 //			bin: ..\msvs_solution\x64\Debug\cairo.dll;
 		}  
 	}
