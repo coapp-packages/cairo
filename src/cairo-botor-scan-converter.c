@@ -199,7 +199,7 @@ floored_muldivrem(int x, int a, int b)
 {
     struct quorem qr;
     long long xa = (long long)x*a;
-    qr.quo = (cairo_fixed_t)(xa/b);
+    qr.quo = xa/b;
     qr.rem = xa%b;
     if ((xa>=0) != (b>=0) && qr.rem) {
 	qr.quo--;
@@ -2124,6 +2124,42 @@ botor_add_edge (cairo_botor_scan_converter_t *self,
     e->flags = START;
 
     self->num_edges++;
+
+    return CAIRO_STATUS_SUCCESS;
+}
+
+static cairo_status_t
+_cairo_botor_scan_converter_add_edge (void		*converter,
+				      const cairo_point_t *p1,
+				      const cairo_point_t *p2,
+				      int top, int bottom,
+				      int dir)
+{
+    cairo_botor_scan_converter_t *self = converter;
+    cairo_edge_t edge;
+
+    edge.line.p1 = *p1;
+    edge.line.p2 = *p2;
+    edge.top = top;
+    edge.bottom = bottom;
+    edge.dir = dir;
+
+    return botor_add_edge (self, &edge);
+}
+
+cairo_status_t
+_cairo_botor_scan_converter_add_polygon (cairo_botor_scan_converter_t *converter,
+					 const cairo_polygon_t *polygon)
+{
+    cairo_botor_scan_converter_t *self = converter;
+    cairo_status_t status;
+    int i;
+
+    for (i = 0; i < polygon->num_edges; i++) {
+	status = botor_add_edge (self, &polygon->edges[i]);
+	if (unlikely (status))
+	    return status;
+    }
 
     return CAIRO_STATUS_SUCCESS;
 }

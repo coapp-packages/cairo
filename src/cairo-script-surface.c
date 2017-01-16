@@ -50,7 +50,7 @@
  *
  * The script surface provides the ability to render to a native
  * script that matches the cairo drawing model. The scripts can
- * be replayed using tools under the util/cairo-script directoriy,
+ * be replayed using tools under the util/cairo-script directory,
  * or with cairo-perf-trace.
  **/
 
@@ -1111,7 +1111,8 @@ attach_snapshot (cairo_script_context_t *ctx,
     _cairo_surface_init (&surface->base,
 			 &script_snapshot_backend,
 			 &ctx->base,
-			 source->content);
+			 source->content,
+			 source->is_vector);
 
     _cairo_output_stream_printf (ctx->stream,
 				 "dup /s%d exch def ",
@@ -1837,7 +1838,7 @@ _emit_path_boxes (cairo_script_surface_t *surface,
 
     if (! _cairo_path_fixed_iter_at_end (&iter)) {
 	_cairo_boxes_fini (&boxes);
-	return FALSE;
+	return CAIRO_STATUS_INVALID_PATH_DATA;
     }
 
     for (chunk = &boxes.chunks; chunk; chunk = chunk->next) {
@@ -3390,8 +3391,10 @@ _cairo_script_surface_show_text_glyphs (void			    *abstract_surface,
 					     glyphs[n].index,
 					     CAIRO_SCALED_GLYPH_INFO_METRICS,
 					     &scaled_glyph);
-	if (unlikely (status))
+	if (unlikely (status)) {
+	    _cairo_scaled_font_thaw_cache (scaled_font);
 	    goto BAIL;
+	}
 
 	if (fabs (glyphs[n].x - x) > 1e-5 || fabs (glyphs[n].y - y) > 1e-5) {
 	    if (fabs (glyphs[n].y - y) < 1e-5) {
@@ -3646,7 +3649,8 @@ _cairo_script_surface_create_internal (cairo_script_context_t *ctx,
     _cairo_surface_init (&surface->base,
 			 &_cairo_script_surface_backend,
 			 &ctx->base,
-			 content);
+			 content,
+			 TRUE); /* is_vector */
 
     _cairo_surface_wrapper_init (&surface->wrapper, passthrough);
 

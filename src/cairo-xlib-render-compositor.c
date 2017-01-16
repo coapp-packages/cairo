@@ -51,8 +51,20 @@
 #include "cairo-image-surface-private.h"
 #include "cairo-list-inline.h"
 #include "cairo-pattern-private.h"
+#include "cairo-pixman-private.h"
 #include "cairo-traps-private.h"
 #include "cairo-tristrip-private.h"
+
+static cairo_int_status_t
+check_composite (const cairo_composite_rectangles_t *extents)
+{
+    cairo_xlib_display_t *display = ((cairo_xlib_surface_t *)extents->surface)->display;
+
+    if (! CAIRO_RENDER_SUPPORTS_OPERATOR (display, extents->op))
+	return CAIRO_INT_STATUS_UNSUPPORTED;
+
+    return CAIRO_STATUS_SUCCESS;
+}
 
 static cairo_int_status_t
 acquire (void *abstract_dst)
@@ -88,7 +100,7 @@ set_clip_region (void *_surface,
     _cairo_xlib_surface_ensure_picture (surface);
 
     if (region != NULL) {
-	XRectangle stack_rects[CAIRO_STACK_ARRAY_LENGTH (sizeof (XRectangle))];
+	XRectangle stack_rects[CAIRO_STACK_ARRAY_LENGTH (XRectangle)];
 	XRectangle *rects = stack_rects;
 	int n_rects, i;
 
@@ -157,6 +169,7 @@ copy_image_boxes (void *_dst,
 	int x2 = _cairo_fixed_integer_part (boxes->chunks.base[0].p2.x);
 	int y2 = _cairo_fixed_integer_part (boxes->chunks.base[0].p2.y);
 
+	_cairo_xlib_shm_surface_mark_active (&image->base);
 	XCopyArea (dst->dpy, src, dst->drawable, gc,
 		   x1 + dx, y1 + dy,
 		   x2 - x1, y2 - y1,
@@ -190,6 +203,7 @@ copy_image_boxes (void *_dst,
 	}
 
 	XSetClipRectangles (dst->dpy, gc, 0, 0, rects, j, Unsorted);
+	_cairo_xlib_shm_surface_mark_active (&image->base);
 	XCopyArea (dst->dpy, src, dst->drawable, gc,
 		   0, 0, image->width, image->height, -dx, -dy);
 	XSetClipMask (dst->dpy, gc, None);
@@ -198,7 +212,6 @@ copy_image_boxes (void *_dst,
 	    free (rects);
     }
 
-    _cairo_xlib_shm_surface_mark_active (&image->base);
     _cairo_xlib_surface_put_gc (dst->display, dst, gc);
     release (dst);
     return CAIRO_STATUS_SUCCESS;
@@ -234,16 +247,20 @@ draw_image_boxes (void *_dst,
 {
     cairo_xlib_surface_t *dst = _dst;
     struct _cairo_boxes_chunk *chunk;
-    cairo_image_surface_t *shm;
+    cairo_image_surface_t *shm = NULL;
     cairo_int_status_t status;
     int i;
 
-    if (image->base.device == dst->base.device &&
-	image->depth == dst->depth &&
-	_cairo_xlib_shm_surface_get_pixmap (&image->base))
+    if (image->base.device == dst->base.device) {
+	if (image->depth != dst->depth)
+	    return CAIRO_INT_STATUS_UNSUPPORTED;
+
+	if (_cairo_xlib_shm_surface_get_pixmap (&image->base))
 	    return copy_image_boxes (dst, image, boxes, dx, dy);
 
-    shm = NULL;
+	goto draw_image_boxes;
+    }
+
     if (boxes_cover_surface (boxes, dst))
 	shm = (cairo_image_surface_t *) _cairo_xlib_surface_get_shm (dst, TRUE);
     if (shm) {
@@ -340,6 +357,7 @@ draw_image_boxes (void *_dst,
 	}
     }
 
+draw_image_boxes:
     status = CAIRO_STATUS_SUCCESS;
     for (chunk = &boxes->chunks; chunk; chunk = chunk->next) {
 	for (i = 0; i < chunk->count; i++) {
@@ -348,10 +366,10 @@ draw_image_boxes (void *_dst,
 	    int y1 = _cairo_fixed_integer_part (b->p1.y);
 	    int x2 = _cairo_fixed_integer_part (b->p2.x);
 	    int y2 = _cairo_fixed_integer_part (b->p2.y);
-	    if ( _cairo_xlib_surface_draw_image (dst, image,
-						 x1 + dx, y1 + dy,
-						 x2 - x1, y2 - y1,
-						 x1, y1)) {
+	    if (_cairo_xlib_surface_draw_image (dst, image,
+						x1 + dx, y1 + dy,
+						x2 - x1, y2 - y1,
+						x1, y1)) {
 		status = CAIRO_INT_STATUS_UNSUPPORTED;
 		goto out;
 	    }
@@ -597,13 +615,22 @@ fill_rectangles (void				*abstract_surface,
 
     //X_DEBUG ((display->display, "fill_rectangles (dst=%x)", (unsigned int) surface->drawable));
 
+    if (fill_reduces_to_source (op, color, dst))
+	op = CAIRO_OPERATOR_SOURCE;
+
+    if (!CAIRO_RENDER_HAS_FILL_RECTANGLES(dst->display)) {
+	cairo_int_status_t status;
+
+	status = CAIRO_INT_STATUS_UNSUPPORTED;
+	if (op == CAIRO_OPERATOR_SOURCE)
+	    status = _cairo_xlib_core_fill_rectangles (dst, color, num_rects, rects);
+	return status;
+    }
+
     render_color.red   = color->red_short;
     render_color.green = color->green_short;
     render_color.blue  = color->blue_short;
     render_color.alpha = color->alpha_short;
-
-    if (fill_reduces_to_source (op, color, dst))
-	op = CAIRO_OPERATOR_SOURCE;
 
     _cairo_xlib_surface_ensure_picture (dst);
     if (num_rects == 1) {
@@ -654,13 +681,22 @@ fill_boxes (void		*abstract_surface,
     cairo_xlib_surface_t *dst = abstract_surface;
     XRenderColor render_color;
 
+    if (fill_reduces_to_source (op, color, dst))
+	op = CAIRO_OPERATOR_SOURCE;
+
+    if (!CAIRO_RENDER_HAS_FILL_RECTANGLES(dst->display)) {
+	cairo_int_status_t status;
+
+	status = CAIRO_INT_STATUS_UNSUPPORTED;
+	if (op == CAIRO_OPERATOR_SOURCE)
+	    status = _cairo_xlib_core_fill_boxes (dst, color, boxes);
+	return status;
+    }
+
     render_color.red   = color->red_short;
     render_color.green = color->green_short;
     render_color.blue  = color->blue_short;
     render_color.alpha = color->alpha_short;
-
-    if (fill_reduces_to_source (op, color, dst))
-	op = CAIRO_OPERATOR_SOURCE;
 
     _cairo_xlib_surface_ensure_picture (dst);
     if (boxes->num_boxes == 1) {
@@ -929,7 +965,7 @@ _cairo_xlib_font_fini (cairo_scaled_font_private_t *abstract_private,
     cairo_list_del (&priv->link);
 
     status = _cairo_xlib_display_acquire (priv->device, &display);
-    if (status)
+    if (unlikely (status)) /* this should be impossible but leak just in case */
 	goto BAIL;
 
     for (i = 0; i < NUM_GLYPHSETS; i++) {
@@ -942,7 +978,7 @@ _cairo_xlib_font_fini (cairo_scaled_font_private_t *abstract_private,
 
     cairo_device_release (&display->base);
 BAIL:
-    cairo_device_destroy (&display->base);
+    cairo_device_destroy (priv->device);
     free (priv);
 }
 
@@ -1251,6 +1287,9 @@ _cairo_xlib_surface_add_glyph (cairo_xlib_display_t *display,
 	    unsigned char   *d;
 	    unsigned char   *new, *n;
 
+	    if (c == 0)
+		break;
+
 	    new = malloc (c);
 	    if (!new) {
 		status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
@@ -1275,6 +1314,9 @@ _cairo_xlib_surface_add_glyph (cairo_xlib_display_t *display,
 	    unsigned int c = glyph_surface->stride * glyph_surface->height / 4;
 	    const uint32_t *d;
 	    uint32_t *new, *n;
+
+	    if (c == 0)
+		break;
 
 	    new = malloc (4 * c);
 	    if (unlikely (new == NULL)) {
@@ -1434,14 +1476,14 @@ _emit_glyphs_chunk (cairo_xlib_display_t *display,
        */
       if (_start_new_glyph_elt (j, &glyphs[i])) {
 	  if (j) {
-	    elts[nelt].nchars = n;
-	    nelt++;
-	    n = 0;
+	      elts[nelt].nchars = n;
+	      nelt++;
+	      n = 0;
 	  }
 	  elts[nelt].chars = char8 + size * j;
 	  elts[nelt].glyphset = info->glyphset;
-	  elts[nelt].xOff = glyphs[i].i.x - dst_x;
-	  elts[nelt].yOff = glyphs[i].i.y - dst_y;
+	  elts[nelt].xOff = glyphs[i].i.x;
+	  elts[nelt].yOff = glyphs[i].i.y;
       }
 
       switch (width) {
@@ -1488,6 +1530,8 @@ check_composite_glyphs (const cairo_composite_rectangles_t *extents,
     cairo_xlib_surface_t *dst = (cairo_xlib_surface_t *)extents->surface;
     cairo_xlib_display_t *display = dst->display;
     int max_request_size, size;
+
+    TRACE ((stderr, "%s\n", __FUNCTION__));
 
     if (! CAIRO_RENDER_SUPPORTS_OPERATOR (display, extents->op))
 	return CAIRO_INT_STATUS_UNSUPPORTED;
@@ -1542,7 +1586,7 @@ composite_glyphs (void				*surface,
     cairo_xlib_display_t *display = dst->display;
     cairo_int_status_t status = CAIRO_INT_STATUS_SUCCESS;
     cairo_scaled_glyph_t *glyph;
-    cairo_fixed_t x = 0, y = 0;
+    cairo_fixed_t x = dst_x, y = dst_y;
     cairo_xlib_font_glyphset_t *glyphset = NULL, *this_glyphset_info;
 
     unsigned long max_index = 0;
@@ -1695,7 +1739,7 @@ _cairo_xlib_mask_compositor_get (void)
 	compositor.fill_rectangles = fill_rectangles;
 	compositor.fill_boxes = fill_boxes;
 	compositor.copy_boxes = copy_boxes;
-	//compositor.check_composite = check_composite;
+	compositor.check_composite = check_composite;
 	compositor.composite = composite;
 	//compositor.check_composite_boxes = check_composite_boxes;
 	compositor.composite_boxes = composite_boxes;
@@ -1922,17 +1966,6 @@ composite_tristrip (void		*abstract_dst,
 
     if (points != points_stack)
 	free (points);
-
-    return CAIRO_STATUS_SUCCESS;
-}
-
-static cairo_int_status_t
-check_composite (const cairo_composite_rectangles_t *extents)
-{
-    cairo_xlib_display_t *display = ((cairo_xlib_surface_t *)extents->surface)->display;
-
-    if (! CAIRO_RENDER_SUPPORTS_OPERATOR (display, extents->op))
-	return CAIRO_INT_STATUS_UNSUPPORTED;
 
     return CAIRO_STATUS_SUCCESS;
 }

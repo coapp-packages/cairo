@@ -11,8 +11,11 @@ AC_USE_SYSTEM_EXTENSIONS
 AC_CONFIG_SRCDIR(src/cairo.h)
 AC_CONFIG_HEADERS(config.h)
 
+AC_CHECK_HEADERS([unistd.h sys/ioctl.h])
+
 AM_INIT_AUTOMAKE([1.11 foreign -Wall no-define no-dist-gzip dist-xz])
 AM_SILENT_RULES([yes])
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR]) dnl Workaround for Automake 1.12
 
 # Initialize libtool
 LT_PREREQ([2.2])
@@ -46,6 +49,18 @@ AC_CHECK_LIB(z, compress,
 	 ],
 	 [have_libz="no (requires zlib http://www.gzip.org/zlib/)"])],
 	 [have_libz="no (requires zlib http://www.gzip.org/zlib/)"])
+
+save_LIBS="$LIBS"
+AC_CHECK_LIB(lzo2, lzo2a_decompress,
+	 [AC_CHECK_HEADER(lzo/lzo2a.h, [
+	  have_lzo=yes
+	  AC_DEFINE(HAVE_LZO, 1, [Define to 1 if you have lzo available])
+	  lzo_LIBS="-llzo2"
+	 ],
+	 [have_lzo="no (requires lzpo http://www.oberhumer.com/opensource/lzo/)"])],
+	 [have_lzo="no (requires lzpo http://www.oberhumer.com/opensource/lzo/)"])
+AC_SUBST(lzo_LIBS)
+LIBS="$save_LIBS"
 
 AC_CHECK_LIB(dl, dlsym,
 	     [have_dlsym=yes; have_dl=yes],
@@ -124,7 +139,8 @@ CAIRO_ENABLE_SURFACE_BACKEND(xlib_xrender, Xlib Xrender, auto, [
 		       CPPFLAGS="$CPPFLAGS $xlib_CFLAGS $xlib_NONPKGCONFIG_CFLAGS"
 		       AC_CHECK_HEADER(X11/extensions/Xrender.h,
 				       [xlib_xrender_NONPKGCONFIG_LIBS="-lXrender"],
-				       [use_xlib_xrender="no (requires $xlib_xrender_REQUIRES http://freedesktop.org/Software/xlibs)"])
+				       [use_xlib_xrender="no (requires $xlib_xrender_REQUIRES http://freedesktop.org/Software/xlibs)"],
+				       [#include <X11/X.h>])
 		       CPPFLAGS=$old_CPPFLAGS
 		      ])
 
@@ -132,7 +148,7 @@ CAIRO_ENABLE_SURFACE_BACKEND(xlib_xrender, Xlib Xrender, auto, [
     old_LIBS=$LIBS
     CFLAGS="$CFLAGS $xlib_CFLAGS $xlib_NONPKGCONFIG_CFLAGS $xlib_xrender_CFLAGS $xlib_xrender_NONPKGCONFIG_CFLAGS"
     LIBS="$LIBS $xlib_LIBS $xlib_NONPKGCONFIG_LIBS $xlib_xrender_LIBS $xlib_xrender_NONPKGCONFIG_LIBS"
-    AC_CHECK_FUNCS([XRenderCreateLinearGradient XRenderCreateRadialGradient XRenderCreateConicalGradient])
+    AC_CHECK_FUNCS([XRenderCreateSolidFill XRenderCreateLinearGradient XRenderCreateRadialGradient XRenderCreateConicalGradient])
     CFLAGS=$old_CFLAGS
     LIBS=$old_LIBS
 
@@ -175,6 +191,7 @@ CAIRO_ENABLE_SURFACE_BACKEND(qt, Qt, no, [
 		    [qt_REQUIRES=""
 		     use_qt="no (requires Qt4 development libraries)"
 		     ])
+  qt_NONPKGCONFIG_LIBS="-lstdc++"
 ])
 
 dnl ===========================================================================
@@ -234,16 +251,16 @@ CAIRO_ENABLE_SURFACE_BACKEND(skia, Skia, no, [
 			      [directory to find compiled skia sources])],
 	      [skia_DIR="$withval"],
 	      [skia_DIR="`pwd`/../skia"])
-  AC_ARG_WITH([skia-bulid],
-	      [AS_HELP_STRING([--with-skia-build=(Release|Debug)]
+  AC_ARG_WITH([skia-build-type],
+	      [AS_HELP_STRING([--with-skia-build-type=(Release|Debug)]
 			      [build of skia to link with, default is Release])],
-	      [skia_BUILD="$withval"],
-	      [skia_BUILD="Release"])
+	      [skia_BUILD_TYPE="$withval"],
+	      [skia_BUILD_TYPE="Release"])
   skia_NONPKGCONFIG_CFLAGS="-I$skia_DIR/include/config -I$skia_DIR/include/core -I$skia_DIR/include/effects"
-  if test "x$skia_BUILD" = x"Release"; then
+  if test "x$skia_BUILD_TYPE" = "xRelease"; then
   	skia_NONPKGCONFIG_CFLAGS="-DSK_RELEASE -DSK_CAN_USE_FLOAT $skia_NONPKGCONFIG_CFLAGS"
   fi
-  skia_NONPKGCONFIG_LIBS="--start-group $skia_DIR/out/$skia_BUILD/obj.target/gyp/libeffects.a $skia_DIR/out/$skia_BUILD/obj.target/gyp/libimages.a $skia_DIR/out/$skia_BUILD/obj.target/gyp/libutils.a $skia_DIR/out/$skia_BUILD/obj.target/gyp/libopts.a $skia_DIR/out/$skia_BUILD/obj.target/gyp/libcore.a -end-group"
+  skia_NONPKGCONFIG_LIBS="-L$skia_DIR/out/$skia_BUILD_TYPE/lib.target/ -lskia -lstdc++"
   AC_SUBST(skia_DIR)
 ])
 
@@ -279,7 +296,7 @@ CAIRO_ENABLE_SURFACE_BACKEND(beos, BeOS/Zeta, no, [
 dnl ===========================================================================
 
 CAIRO_ENABLE_SURFACE_BACKEND(drm, DRM, no, [
-  drm_REQUIRES="libudev >= 136"
+  drm_REQUIRES="libudev >= 136, libdrm >= 2.4"
   PKG_CHECK_MODULES(drm, $drm_REQUIRES, ,
    [use_drm="no (requires $drm_REQUIRES, udev is available from git://git.kernel.org/pub/scm/linux/hotplug/udev.git)"])
 ])
@@ -359,6 +376,10 @@ CAIRO_ENABLE_SURFACE_BACKEND(glesv2, OpenGLESv2, no, [
 
   if test "x$have_dl" = "xyes" -a "x$have_dlsym" = "xyes"; then
     glesv2_LIBS="$glesv2_LIBS -ldl"
+  fi
+
+  if test "x$use_glesv2" = "xyes" -a "x$use_gl" = "xyes"; then
+      AC_MSG_ERROR([use either --enable-gl=yes or --enable-glesv2=yes. Not both at the same time.])
   fi
 
   need_egl_functions=yes
@@ -449,6 +470,9 @@ dnl ===========================================================================
 any2ppm_cs=no
 CAIRO_ENABLE_SURFACE_BACKEND(script, script, yes, [
   any2ppm_cs=yes
+  # The script backend requires zlib.
+  use_script=$have_libz
+  script_NONPKGCONFIG_LIBS=-lz
 ])
 
 dnl ===========================================================================
@@ -522,13 +546,6 @@ if test "x$use_ft" = "xyes"; then
   _save_cflags="$CFLAGS"
   LIBS="$LIBS $ft_LIBS"
   CFLAGS="$CFLAGS $ft_CFLAGS"
-  AC_CHECK_MEMBER(FT_Bitmap_Size.y_ppem,
-                  HAVE_FT_BITMAP_SIZE_Y_PPEM=1,
-                  HAVE_FT_BITMAP_SIZE_Y_PPEM=0,
-                  [#include <ft2build.h>
-                   #include FT_FREETYPE_H])
-  AC_DEFINE_UNQUOTED(HAVE_FT_BITMAP_SIZE_Y_PPEM,$HAVE_FT_BITMAP_SIZE_Y_PPEM,
-                     [FT_Bitmap_Size structure includes y_ppem field])
 
   AC_CHECK_FUNCS(FT_Get_X11_Font_Format FT_GlyphSlot_Embolden FT_GlyphSlot_Oblique FT_Load_Sfnt_Table FT_Library_SetLcdFilter)
 
@@ -619,7 +636,7 @@ CAIRO_ENABLE_SURFACE_BACKEND(svg, SVG, yes, [
   fi
 ])
 
-LIBRSVG_VERSION_REQUIRED=2.15.0
+LIBRSVG_VERSION_REQUIRED=2.35.0
 test_svg=no
 any2ppm_svg=no
 if test "x$use_svg" = "xyes"; then
@@ -648,7 +665,7 @@ CAIRO_ENABLE(test_surfaces, test surfaces, no)
 dnl ===========================================================================
 
 CAIRO_ENABLE_SURFACE_BACKEND(image, image, always, [
-  pixman_REQUIRES="pixman-1 >= 0.22.0"
+  pixman_REQUIRES="pixman-1 >= 0.30.0"
   PKG_CHECK_MODULES(pixman, $pixman_REQUIRES, ,
     [use_image="no (requires $pixman_REQUIRES http://cairographics.org/releases/)"])
   image_REQUIRES=$pixman_REQUIRES
@@ -696,7 +713,7 @@ dnl ===========================================================================
 dnl Build gobject integration library
 
 CAIRO_ENABLE_FUNCTIONS(gobject, gobject, auto, [
-  gobject_REQUIRES="gobject-2.0 glib-2.0"
+  gobject_REQUIRES="gobject-2.0 glib-2.0 >= 2.14"
   PKG_CHECK_MODULES(GOBJECT, $gobject_REQUIRES, ,
     [use_gobject="no (requires $gobject_REQUIRES http://download.gnome.org/pub/GNOME/sources/glib/)"])
   gobject_NONPKGCONFIG_EXTRA_LIBS="-L\${libdir} -lcairo-gobject"
@@ -791,7 +808,7 @@ CAIRO_ENABLE(symbol_lookup, symbol-lookup, auto, [
 PKG_CHECK_MODULES(glib, glib-2.0, have_glib=yes, have_glib=no)
 AC_SUBST(glib_CFLAGS)
 AC_SUBST(glib_LIBS)
-AM_CONDITIONAL(BUILD_SPHINX, test "x$have_glib" = "xyes")
+AM_CONDITIONAL(BUILD_SPHINX, test "x$have_glib" = "xyes" -a "x$have_windows" = "xno")
 
 save_LIBS="$LIBS"
 AC_CHECK_LIB(rt, shm_open, shm_LIBS="-lrt")
@@ -857,6 +874,8 @@ util/cairo-trace/cairo-trace
 doc/Makefile
 doc/public/Makefile
 ])
+AC_CONFIG_COMMANDS([cairo-trace],
+		   [chmod a+x util/cairo-trace/cairo-trace])
 
 AC_OUTPUT
 CAIRO_REPORT

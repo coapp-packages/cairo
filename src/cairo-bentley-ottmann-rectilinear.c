@@ -118,7 +118,7 @@ cairo_bo_event_compare (const cairo_bo_event_t *a,
     if (cmp)
 	return cmp;
 
-    return (int)(a - b);
+    return a - b;
 }
 
 static inline cairo_bo_event_t *

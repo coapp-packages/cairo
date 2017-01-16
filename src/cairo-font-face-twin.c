@@ -192,7 +192,7 @@ parse_int (const char *word,
 {
   char *end;
   long val = strtol (word, &end, 10);
-  int i = (int)val;
+  int i = val;
 
   if (end != word && (end == word + wordlen) && val >= 0 && val == i)
     {
@@ -218,7 +218,7 @@ find_field (const char *what,
 
   if (what)
     {
-      i = (int)strlen (what);
+      i = strlen (what);
       if (len > i && 0 == strncmp (what, str, i) && str[i] == '=')
 	{
 	  str += i + 1;
@@ -276,11 +276,11 @@ face_props_parse (twin_face_properties_t *props,
 	    continue;
 
 	if (start < end)
-		parse_field (props, start, (int)(end - start));
+		parse_field (props, start, end - start);
 	start = end + 1;
     }
     if (start < end)
-	    parse_field (props, start, (int)(end - start));
+	    parse_field (props, start, end - start);
 }
 
 static twin_face_properties_t *

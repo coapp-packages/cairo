@@ -189,6 +189,7 @@
     <ClCompile Include="..\..\src\cairo-image-info.c" />
     <ClCompile Include="..\..\src\cairo-image-source.c" />
     <ClCompile Include="..\..\src\cairo-image-surface.c" />
+    <ClCompile Include="..\..\src\cairo-line.c" />
     <ClCompile Include="..\..\src\cairo-lzw.c" />
     <ClCompile Include="..\..\src\cairo-mask-compositor.c" />
     <ClCompile Include="..\..\src\cairo-matrix.c" />
@@ -207,10 +208,12 @@
     <ClCompile Include="..\..\src\cairo-path-in-fill.c" />
     <ClCompile Include="..\..\src\cairo-path-stroke-boxes.c" />
     <ClCompile Include="..\..\src\cairo-path-stroke-polygon.c" />
+    <ClCompile Include="..\..\src\cairo-path-stroke-traps.c" />
     <ClCompile Include="..\..\src\cairo-path-stroke-tristrip.c" />
     <ClCompile Include="..\..\src\cairo-path-stroke.c" />
     <ClCompile Include="..\..\src\cairo-path.c" />
     <ClCompile Include="..\..\src\cairo-pattern.c" />
+    <ClCompile Include="..\..\src\cairo-pdf-interchange.c" />
     <ClCompile Include="..\..\src\cairo-pdf-operators.c" />
     <ClCompile Include="..\..\src\cairo-pdf-shading.c" />
     <ClCompile Include="..\..\src\cairo-pdf-surface.c" />
@@ -245,6 +248,8 @@
     <ClCompile Include="..\..\src\cairo-surface-wrapper.c" />
     <ClCompile Include="..\..\src\cairo-surface.c" />
     <ClCompile Include="..\..\src\cairo-svg-surface.c" />
+    <ClCompile Include="..\..\src\cairo-tag-attributes.c" />
+    <ClCompile Include="..\..\src\cairo-tag-stack.c" />
     <ClCompile Include="..\..\src\cairo-time.c" />
     <ClCompile Include="..\..\src\cairo-tor-scan-converter.c" />
     <ClCompile Include="..\..\src\cairo-tor22-scan-converter.c" />
@@ -275,24 +280,29 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\cairo-line-inline.h" />
+    <ClInclude Include="..\..\src\cairo-line-private.h" />
+    <ClInclude Include="..\..\src\cairo-pixman-private.h" />
+    <ClInclude Include="..\..\src\cairo-tag-attributes-private.h" />
+    <ClInclude Include="..\..\src\cairo-tag-stack-private.h" />
     <ClInclude Include="..\..\src\win32\cairo-win32-private.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\libpng.redist.1.6.23.1\build\native\libpng.redist.targets" Condition="Exists('..\packages\libpng.redist.1.6.23.1\build\native\libpng.redist.targets')" />
     <Import Project="..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets" Condition="Exists('..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets')" />
     <Import Project="..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets" Condition="Exists('..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" />
-    <Import Project="..\packages\libpng.1.6.23.1\build\native\libpng.targets" Condition="Exists('..\packages\libpng.1.6.23.1\build\native\libpng.targets')" />
-    <Import Project="..\packages\pixman_static.0.32.4.3\build\native\pixman_static.targets" Condition="Exists('..\packages\pixman_static.0.32.4.3\build\native\pixman_static.targets')" />
+    <Import Project="..\packages\libpng.redist.1.6.28.1\build\native\libpng.redist.targets" Condition="Exists('..\packages\libpng.redist.1.6.28.1\build\native\libpng.redist.targets')" />
+    <Import Project="..\packages\pixman_static.0.32.4.4\build\native\pixman_static.targets" Condition="Exists('..\packages\pixman_static.0.32.4.4\build\native\pixman_static.targets')" />
+    <Import Project="..\packages\libpng.1.6.28.1\build\native\libpng.targets" Condition="Exists('..\packages\libpng.1.6.28.1\build\native\libpng.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\libpng.redist.1.6.23.1\build\native\libpng.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libpng.redist.1.6.23.1\build\native\libpng.redist.targets'))" />
     <Error Condition="!Exists('..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets'))" />
     <Error Condition="!Exists('..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets'))" />
-    <Error Condition="!Exists('..\packages\libpng.1.6.23.1\build\native\libpng.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libpng.1.6.23.1\build\native\libpng.targets'))" />
-    <Error Condition="!Exists('..\packages\pixman_static.0.32.4.3\build\native\pixman_static.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\pixman_static.0.32.4.3\build\native\pixman_static.targets'))" />
+    <Error Condition="!Exists('..\packages\libpng.redist.1.6.28.1\build\native\libpng.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libpng.redist.1.6.28.1\build\native\libpng.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\pixman_static.0.32.4.4\build\native\pixman_static.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\pixman_static.0.32.4.4\build\native\pixman_static.targets'))" />
+    <Error Condition="!Exists('..\packages\libpng.1.6.28.1\build\native\libpng.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libpng.1.6.28.1\build\native\libpng.targets'))" />
   </Target>
 </Project>

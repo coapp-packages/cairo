@@ -58,7 +58,7 @@ static const cairo_surface_backend_t _cairo_surface_observer_backend;
 
 /* observation/stats */
 
-static void init_stats (struct cairo_stat *s)
+static void init_stats (struct stat *s)
 {
     s->min = HUGE_VAL;
     s->max = -HUGE_VAL;
@@ -261,7 +261,7 @@ add_clip (struct clip *stats,
 }
 
 static void
-stats_add (struct cairo_stat *s, double v)
+stats_add (struct stat *s, double v)
 {
     if (v < s->min)
 	s->min = v;
@@ -331,7 +331,7 @@ _cairo_device_observer_destroy (void *_device)
 }
 
 static const cairo_device_backend_t _cairo_device_observer_backend = {
-    (cairo_device_type_t)CAIRO_INTERNAL_DEVICE_TYPE_OBSERVER,
+    CAIRO_INTERNAL_DEVICE_TYPE_OBSERVER,
 
     _cairo_device_observer_lock,
     _cairo_device_observer_unlock,
@@ -385,7 +385,8 @@ _cairo_surface_create_observer_internal (cairo_device_t *device,
 
     _cairo_surface_init (&surface->base,
 			 &_cairo_surface_observer_backend, device,
-			 target->content);
+			 target->content,
+			 target->is_vector);
 
     status = log_init (&surface->log,
 		       ((cairo_device_observer_t *)device)->log.record != NULL);
@@ -648,12 +649,12 @@ add_record (cairo_observation_t *log,
 
     r->index = log->record ? log->record->commands.num_elements : 0;
 
-    status = (cairo_int_status_t)_cairo_array_append (&log->timings, r);
+    status = _cairo_array_append (&log->timings, r);
     assert (status == CAIRO_INT_STATUS_SUCCESS);
 }
 
 static void
-sync (cairo_surface_t *target, int x, int y)
+_cairo_surface_sync (cairo_surface_t *target, int x, int y)
 {
     cairo_rectangle_int_t extents;
 
@@ -751,7 +752,7 @@ _cairo_surface_observer_paint (void *abstract_surface,
     if (unlikely (status))
 	return status;
 
-    sync (surface->target, x, y);
+    _cairo_surface_sync (surface->target, x, y);
     t = _cairo_time_get_delta (t);
 
     add_record_paint (&surface->log, surface->target, op, source, clip, t);
@@ -837,7 +838,7 @@ _cairo_surface_observer_mask (void *abstract_surface,
     if (unlikely (status))
 	return status;
 
-    sync (surface->target, x, y);
+    _cairo_surface_sync (surface->target, x, y);
     t = _cairo_time_get_delta (t);
 
     add_record_mask (&surface->log,
@@ -944,7 +945,7 @@ _cairo_surface_observer_fill (void			*abstract_surface,
     if (unlikely (status))
 	return status;
 
-    sync (surface->target, x, y);
+    _cairo_surface_sync (surface->target, x, y);
     t = _cairo_time_get_delta (t);
 
     add_record_fill (&surface->log,
@@ -1063,7 +1064,7 @@ _cairo_surface_observer_stroke (void				*abstract_surface,
     if (unlikely (status))
 	return status;
 
-    sync (surface->target, x, y);
+    _cairo_surface_sync (surface->target, x, y);
     t = _cairo_time_get_delta (t);
 
     add_record_stroke (&surface->log,
@@ -1183,7 +1184,7 @@ _cairo_surface_observer_glyphs (void			*abstract_surface,
     if (unlikely (status))
 	return status;
 
-    sync (surface->target, x, y);
+    _cairo_surface_sync (surface->target, x, y);
     t = _cairo_time_get_delta (t);
 
     add_record_glyphs (&surface->log,
@@ -1217,8 +1218,6 @@ _cairo_surface_observer_mark_dirty (void *abstract_surface,
 {
     cairo_surface_observer_t *surface = abstract_surface;
     cairo_status_t status;
-
-    printf ("mark-dirty (%d, %d) x (%d, %d)\n", x, y, width, height);
 
     status = CAIRO_STATUS_SUCCESS;
     if (surface->target->backend->mark_dirty_rectangle)
@@ -1368,10 +1367,15 @@ static const cairo_surface_backend_t _cairo_surface_observer_backend = {
 /**
  * cairo_surface_create_observer:
  * @target: an existing surface for which the observer will watch
+ * @mode: sets the mode of operation (normal vs. record)
  *
  * Create a new surface that exists solely to watch another is doing. In
  * the process it will log operations and times, which are fast, which are
  * slow, which are frequent, etc.
+ *
+ * The @mode parameter can be set to either CAIRO_SURFACE_OBSERVER_NORMAL
+ * or CAIRO_SURFACE_OBSERVER_RECORD_OPERATIONS, to control whether or not
+ * the internal observer should record operations.
  *
  * Return value: a pointer to the newly allocated surface. The caller
  * owns the surface and should call cairo_surface_destroy() when done

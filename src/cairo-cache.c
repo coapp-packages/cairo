@@ -46,7 +46,7 @@ _cairo_cache_shrink_to_accommodate (cairo_cache_t *cache,
 static cairo_bool_t
 _cairo_cache_entry_is_non_zero (const void *entry)
 {
-    return (cairo_bool_t)((const cairo_cache_entry_t *) entry)->size;
+    return ((const cairo_cache_entry_t *) entry)->size;
 }
 
 

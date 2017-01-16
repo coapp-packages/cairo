@@ -142,7 +142,7 @@ _cairo_surface_snapshot_get_extents (void                  *abstract_surface,
 }
 
 static const cairo_surface_backend_t _cairo_surface_snapshot_backend = {
-    (cairo_surface_type_t)CAIRO_INTERNAL_SURFACE_TYPE_SNAPSHOT,
+    CAIRO_INTERNAL_SURFACE_TYPE_SNAPSHOT,
     _cairo_surface_snapshot_finish,
     NULL,
 
@@ -200,14 +200,14 @@ _cairo_surface_snapshot_copy_on_write (cairo_surface_t *surface)
     status = _cairo_surface_acquire_source_image (snapshot->target, &image, &extra);
     if (unlikely (status)) {
 	snapshot->target = _cairo_surface_create_in_error (status);
-	status = (cairo_status_t)_cairo_surface_set_error (surface, (cairo_int_status_t)status);
+	status = _cairo_surface_set_error (surface, status);
 	goto unlock;
     }
     clone = image->base.backend->snapshot (&image->base);
     _cairo_surface_release_source_image (snapshot->target, image, extra);
 
 done:
-    status = (cairo_status_t)_cairo_surface_set_error (surface, (cairo_int_status_t)clone->status);
+    status = _cairo_surface_set_error (surface, clone->status);
     snapshot->target = snapshot->clone = clone;
     snapshot->base.type = clone->type;
 unlock:
@@ -265,7 +265,8 @@ _cairo_surface_snapshot (cairo_surface_t *surface)
     _cairo_surface_init (&snapshot->base,
 			 &_cairo_surface_snapshot_backend,
 			 NULL, /* device */
-			 surface->content);
+			 surface->content,
+			 surface->is_vector);
     snapshot->base.type = surface->type;
 
     CAIRO_MUTEX_INIT (snapshot->mutex);

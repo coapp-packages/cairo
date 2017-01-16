@@ -45,7 +45,7 @@
 #include "cairo-surface-backend-private.h"
 #include "cairo-time-private.h"
 
-struct cairo_stat {
+struct stat {
     double min, max, sum, sum_sq;
     unsigned count;
 };
@@ -57,12 +57,12 @@ struct cairo_stat {
 #define NUM_FILL_RULE (CAIRO_FILL_RULE_EVEN_ODD+1)
 
 struct extents {
-    struct cairo_stat area;
+    struct stat area;
     unsigned int bounded, unbounded;
 };
 
 struct pattern {
-    unsigned int type[7]; /* native/record/other surface/gradients */
+    unsigned int type[8]; /* native/record/other surface/gradients */
 };
 
 struct path {
@@ -152,7 +152,7 @@ struct _cairo_observation {
 	unsigned int antialias[NUM_ANTIALIAS];
 	struct pattern source;
 	struct path path;
-	struct cairo_stat line_width;
+	struct stat line_width;
 	struct clip clip;
 	unsigned int noop;
 
