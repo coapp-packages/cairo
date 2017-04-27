@@ -84,6 +84,8 @@ cairo_private = \
 	cairo-image-info-private.h \
 	cairo-image-surface-inline.h \
 	cairo-image-surface-private.h \
+	cairo-line-inline.h \
+	cairo-line-private.h \
 	cairo-list-inline.h \
 	cairo-list-private.h \
 	cairo-malloc-private.h \
@@ -99,6 +101,7 @@ cairo_private = \
 	cairo-path-private.h \
 	cairo-pattern-inline.h \
 	cairo-pattern-private.h \
+	cairo-pixman-private.h \
 	cairo-private.h \
 	cairo-recording-surface-inline.h \
 	cairo-recording-surface-private.h \
@@ -175,6 +178,7 @@ cairo_sources = \
 	cairo-image-info.c \
 	cairo-image-source.c \
 	cairo-image-surface.c \
+	cairo-line.c \
 	cairo-lzw.c \
 	cairo-matrix.c \
 	cairo-mask-compositor.c \
@@ -195,6 +199,7 @@ cairo_sources = \
 	cairo-path-stroke.c \
 	cairo-path-stroke-boxes.c \
 	cairo-path-stroke-polygon.c \
+	cairo-path-stroke-traps.c \
 	cairo-path-stroke-tristrip.c \
 	cairo-pattern.c \
 	cairo-pen.c \
@@ -274,8 +279,8 @@ _cairo_deflate_stream_sources = cairo-deflate-stream.c
 cairo_sources += $(_cairo_deflate_stream_sources)
 
 cairo_pdf_headers = cairo-pdf.h
-cairo_pdf_private = cairo-pdf-surface-private.h
-cairo_pdf_sources = cairo-pdf-surface.c
+cairo_pdf_private = cairo-pdf-surface-private.h cairo-tag-stack-private.h cairo-tag-attributes-private.h
+cairo_pdf_sources = cairo-pdf-surface.c cairo-pdf-interchange.c cairo-tag-stack.c cairo-tag-attributes.c
 
 cairo_svg_headers = cairo-svg.h
 cairo_svg_private = cairo-svg-surface-private.h
@@ -332,6 +337,7 @@ cairo_xcb_sources = \
 		    cairo-xcb-surface.c \
 		    cairo-xcb-surface-core.c \
 		    cairo-xcb-surface-render.c \
+		    cairo-xcb-resources.c \
 		    $(NULL)
 
 cairo_qt_headers = cairo-qt.h

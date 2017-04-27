@@ -157,7 +157,8 @@ get_buddy (cairo_mempool_t *pool, size_t offset, int bits)
 {
     struct _cairo_memblock *block;
 
-    assert (offset + (1 << bits) <= pool->num_blocks);
+    if (offset + (1 << bits) >= pool->num_blocks)
+	return NULL; /* invalid */
 
     if (BITTEST (pool, offset + (1 << bits) - 1))
 	return NULL; /* buddy is allocated */
@@ -283,8 +284,17 @@ _cairo_mempool_init (cairo_mempool_t *pool,
 		      void *base, size_t bytes,
 		      int min_bits, int num_sizes)
 {
+    unsigned long tmp;
     int num_blocks;
     int i;
+
+    /* Align the start to an integral chunk */
+    tmp = ((unsigned long) base) & ((1 << min_bits) - 1);
+    if (tmp) {
+	tmp = (1 << min_bits) - tmp;
+	base = (char *)base + tmp;
+	bytes -= tmp;
+    }
 
     assert ((((unsigned long) base) & ((1 << min_bits) - 1)) == 0);
     assert (num_sizes < ARRAY_LENGTH (pool->free));

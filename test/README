@@ -21,11 +21,18 @@ The test suite needs to be run before any code is committed and before
 any release. See below for hints and rules governing the use of the suite.
 
 The test suite is built as a single binary, which allows you to choose
-individual or categories of tests to run. For example, if you want to
-run all text related tests you can use:
-    ./cairo-test-suite text
+individual or categories of tests to run. For example, to run specific tests:
+    ./cairo-test-suite record-neg-extents-unbounded record-neg-extents-bounded
+Or if you want to run all paint.* related tests you can use:
+    ./cairo-test-suite paint
 Or if you want to check the current status of known failures:
     ./cairo-test-suite XFAIL
+Or to run a subset of tests, use the -k option to run only the tests
+that include the given keyword:
+    ./cairo-test-suite -k downscale
+The binary also permits controlling which backend is used via the
+CAIRO_TEST_TARGET environment variable, so for instance:
+    CAIRO_TEST_TARGET=gl ./cairo-test-suite -k blur
 This binary should be backwards-compatible with all library versions,
 allowing you to compare current versus past behaviour for any test.
 
@@ -35,13 +42,20 @@ There are some mechanisms to limit the tests run during "make test".
 These come very handy when doing development, but should not be used
 to circumvent the "pass" requirements listed below.
 
-To limit the backends that the tests are run against, use the
-TARGETS make variable, that can also be passed to make.
-It should contain a (space-, comma-, etc-separated) list of backends to test.
-To limit the tests run, use the CAIRO_TESTS environment variable, which
-should be a space-separated list of tests to run.  For example:
+make's TARGETS environment variable can be used to limit the backends when
+running the tests. It should contain a (space-, comma-separated) list of
+backends. CAIRO_TESTS environment variable, which is a comma-, space-seperated
+lists, can be used to limit the tests run.
+For example:
 
   CAIRO_TESTS="zero-alpha" make test TARGETS=image,ps
+
+make's FORMAT variable can also be used to limit the content formats when
+running the tests. It should contain a (space-, comma-separated) list of
+content formats to test.
+For example:
+
+  CAIRO_TESTS="zero-alpha" make test TARGETS=image,ps FORMAT="rgb,rgba"
 
 Another very handy mechanism when trying to fix bugs is:
 
@@ -96,10 +110,10 @@ Here are some of the relevant details:
 
   * Your system must have a copy of the DejaVu font, the sha1sum of
     the version used are listed in [...].  These are
-      "DejaVu Sans" (DejaVuSans.ttf) [1cd336329f45f241002ded61893d91e3acd04436];
-      "DejaVu Sans Mono" (DejaVuSansMono.ttf) [0458c0f0fb57f3eb8ced62f26fe7c5ed4e6a9a68];
-      "DejaVu Serif" (DejaVuSerif.ttf) [93502d0d0445d1fe1c9f51e51b3e0169266346ce];
-      [the DejaVu fonts can be installed from the ttf-dejavu 2.33-2 Debian package]
+      "DejaVu Sans" (DejaVuSans.ttf) [e9831ee4fd2e1d0ac54508a548c6a449545eba3f];
+      "DejaVu Sans Mono" (DejaVuSansMono.ttf) [25d854fbd0450a372615a26a8ef9a1024bd3efc6];
+      "DejaVu Serif" (DejaVuSerif.ttf) [78a81850dc7883969042cf3d6dfd18eea7e43e2f];
+      [the DejaVu fonts can be installed from the fonts-dejavu-core 2.34-1 Debian package]
     and also
       "Nimbus Sans L" (n019003l.pfb)
       [which can be found in the gsfonts Debian package].
@@ -117,7 +131,7 @@ Here are some of the relevant details:
     the fixes you will need to avoid false negatives from the test
     suite.
 
-  * To test the ps backend, you will need ghostscript version 9.04.
+  * To test the ps backend, you will need ghostscript version 9.06.
 
   * Testing the xlib backend is problematic since many X server
     drivers have bugs that are exercised by the test suite. (Or, if
@@ -156,7 +170,7 @@ your changes. The process looks like this:
 
         # Let's save those output images
         mkdir /some/directory/
-        cp test/*-out.png /some/directory/
+        cp -r test/output /some/directory/
 
         # hack, hack, hack
 
@@ -186,16 +200,16 @@ A new test case should be added by imitating the style of an existing
 test. This means adding the following files:
 
 	new-bug.c
-	new-bug-ref.png
+	reference/new-bug.ref.png
+	reference/new-bug.xfail.png
 
 Where new-bug.c is a minimal program to demonstrate the bug, following
-the style of existing tests. The new-bug-ref.png image should contain
-the desired result of new-bug.c if the bug were fixed.
+the style of existing tests. The new-bug.ref.png image should contain
+the desired result of new-bug.c if the bug were fixed while
+new-bug.xfail.png contains the current results of the test.
 
-Makefile.am should be edited, adding new-bug.c to both the TESTS and
-XFAIL_TESTS lists and new-bug-ref.png to EXTRA_DIST. Add new-bug to
-.gitignore, and last but not least, don't forget to "git add" the new
-files.
+Makefile.sources should be edited by adding new-bug.c to test_sources.
+And last but not least, don't forget to "git add" the new files.
 
 When a new feature is added
 ---------------------------
@@ -203,7 +217,7 @@ It's important for the regression suite to keep pace with development
 of the library. So a new test should be added for each new feature.
 The work involved is similar the work described above for new bugs.
 The only distinction is that the test is expected to pass so it
-should not be added to the XFAIL_TESTS list.
+should not need a new-bug.xfail.png file.
 
 While working on a test
 -----------------------
@@ -217,8 +231,7 @@ When a bug is fixed
 -------------------
 The fix should be verified by running the test suite which should
 result in an "unexpected pass" for the test of interest. Rejoice as
-appropriate, then remove the relevant file name from the XFAIL_TESTS
-variable in Makefile.am.
+appropriate, then remove the relevant xfail.png file from git.
 
 Before releasing
 ----------------
@@ -256,8 +269,9 @@ correct, then there's likely a bug in poppler. In this case, we can
 simply report the poppler bug, (making it block 12143 above), post the
 PDF result from the test suite, and list the bug in this file. Once
 we've done this, we can capture poppler's buggy output as a
-pdf-specific reference image so that the test suite will regard the
-test as passing, (and we'll ensure there is no regression).
+pdf-specific reference image (as reference/*.xfail.png) so that the 
+test suite will regard the test as passing, (and we'll ensure there
+is no regression).
 
 Once the poppler bug gets fixed, the test suite will start reporting a
 false negative again, and this will be easy to fix by simply removing
@@ -265,42 +279,4 @@ the pdf-specific reference image.
 
 Here are the reported poppler bugs and the tests they affect:
 
-Poppler doesn't correctly handle gradients with transparency
-https://bugs.freedesktop.org/show_bug.cgi?id=12144
---------------------------------------------------
-fill-alpha-pattern
-gradient-alpha
-gradient-constant-alpha
-linear-gradient
-linear-gradient-reflect
-radial-gradient
-trap-clip
-
-Poppler should paint images with CAIRO_EXTEND_PAD
-https://bugs.freedesktop.org/show_bug.cgi?id=14578
---------------------------------------------------
-paint-source-alpha
-paint-with-alpha
-rotate-image-surface-paint
-scale-source-surface-paint
-
-Incorrect clipping of group object (regression?)
-https://bugs.freedesktop.org/show_bug.cgi?id=14580
---------------------------------------------------
-push-group
-
-spurious horizontal stripes in color gradients
-https://bugs.freedesktop.org/show_bug.cgi?id=10942
---------------------------------------------------
-smask 
-smask-fill 
-smask-image-mask 
-smask-mask 
-smask-paint 
-smask-stroke 
-smask-text
-
-Ghostscript does not correctly render small miters
-http://bugs.ghostscript.com/show_bug.cgi?id=690098
---------------------------------------------------
-miter-precision
+[Newest was closed in 2009.]

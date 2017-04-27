@@ -60,6 +60,7 @@
 #include "cairo-image-surface-private.h"
 #include "cairo-list-inline.h"
 #include "cairo-pattern-private.h"
+#include "cairo-pixman-private.h"
 #include "cairo-region-private.h"
 #include "cairo-scaled-font-private.h"
 #include "cairo-surface-snapshot-private.h"
@@ -385,13 +386,13 @@ _cairo_xlib_surface_finish (void *abstract_surface)
     cairo_status_t        status;
     cairo_xlib_display_t *display;
 
-    X_DEBUG ((display->display, "finish (drawable=%x)", (unsigned int) surface->drawable));
-
     cairo_list_del (&surface->link);
 
     status = _cairo_xlib_display_acquire (surface->base.device, &display);
     if (unlikely (status))
         return status;
+
+    X_DEBUG ((display->display, "finish (drawable=%x)", (unsigned int) surface->drawable));
 
     if (surface->embedded_source.picture)
 	XRenderFreePicture (display->display, surface->embedded_source.picture);
@@ -806,6 +807,7 @@ _get_image_surface (cairo_xlib_surface_t    *surface,
 	    }
 
 	    cairo_surface_destroy (&image->base);
+	    image = NULL;
 	}
     }
 
@@ -1010,7 +1012,8 @@ _get_image_surface (cairo_xlib_surface_t    *surface,
     cairo_device_release (&display->base);
 
     if (unlikely (status)) {
-	cairo_surface_destroy (&image->base);
+	if (image)
+	    cairo_surface_destroy (&image->base);
 	return _cairo_surface_create_in_error (status);
     }
 
@@ -1090,9 +1093,10 @@ _cairo_xlib_surface_draw_image (cairo_xlib_surface_t   *surface,
     XImage ximage;
     cairo_format_masks_t image_masks;
     int native_byte_order = _cairo_is_little_endian () ? LSBFirst : MSBFirst;
+    cairo_surface_t *shm_image = NULL;
     pixman_image_t *pixman_image = NULL;
     cairo_status_t status;
-    cairo_bool_t own_data;
+    cairo_bool_t own_data = FALSE;
     cairo_bool_t is_rgb_image;
     GC gc;
 
@@ -1127,9 +1131,39 @@ _cairo_xlib_surface_draw_image (cairo_xlib_surface_t   *surface,
 	ximage.bits_per_pixel = image_masks.bpp;
 	ximage.bytes_per_line = image->stride;
 	ximage.data = (char *)image->data;
-	if (image->base.device == surface->base.device)
+	if (image->base.device != surface->base.device) {
+	    /* If PutImage will break the image up into chunks, prefer to
+	     * send it all in one pass with ShmPutImage.  For larger images,
+	     * it is further advantageous to reduce the number of copies,
+	     * albeit at the expense of more SHM bookkeeping.
+	     */
+	    int max_request_size = XExtendedMaxRequestSize (display->display);
+	    if (max_request_size == 0)
+		max_request_size = XMaxRequestSize (display->display);
+	    if (max_request_size > 8192)
+		max_request_size = 8192;
+	    if (width * height * 4 > max_request_size) {
+		shm_image = _cairo_xlib_surface_create_shm__image (surface,
+								   image->pixman_format,
+								   width, height);
+		if (shm_image && shm_image->status == CAIRO_STATUS_SUCCESS) {
+		    cairo_image_surface_t *clone = (cairo_image_surface_t *) shm_image;
+		    pixman_image_composite32 (PIXMAN_OP_SRC,
+					      image->pixman_image, NULL, clone->pixman_image,
+					      src_x, src_y,
+					      0, 0,
+					      0, 0,
+					      width, height);
+		    ximage.obdata = _cairo_xlib_shm_surface_get_obdata (shm_image);
+		    ximage.data = (char *)clone->data;
+		    ximage.bytes_per_line = clone->stride;
+		    ximage.width = width;
+		    ximage.height = height;
+		    src_x = src_y = 0;
+		}
+	    }
+	} else
 	    ximage.obdata = _cairo_xlib_shm_surface_get_obdata (&image->base);
-	own_data = FALSE;
 
 	ret = XInitImage (&ximage);
 	assert (ret != 0);
@@ -1147,29 +1181,48 @@ _cairo_xlib_surface_draw_image (cairo_xlib_surface_t   *surface,
         ret = _pixman_format_from_masks (&image_masks, &intermediate_format);
         assert (ret);
 
-	own_data = FALSE;
+	shm_image = _cairo_xlib_surface_create_shm__image (surface,
+							   intermediate_format,
+							   width, height);
+	if (shm_image && shm_image->status == CAIRO_STATUS_SUCCESS) {
+	    cairo_image_surface_t *clone = (cairo_image_surface_t *) shm_image;
 
-        pixman_image = pixman_image_create_bits (intermediate_format,
-                                                 width, height, NULL, 0);
-        if (pixman_image == NULL) {
-	    status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
-            goto BAIL;
-        }
+	    pixman_image_composite32 (PIXMAN_OP_SRC,
+				      image->pixman_image,
+				      NULL,
+				      clone->pixman_image,
+				      src_x, src_y,
+				      0, 0,
+				      0, 0,
+				      width, height);
 
-        pixman_image_composite32 (PIXMAN_OP_SRC,
-                                  image->pixman_image,
-                                  NULL,
-                                  pixman_image,
-                                  src_x, src_y,
-                                  0, 0,
-                                  0, 0,
-                                  width, height);
+	    ximage.data = (char *) clone->data;
+	    ximage.obdata = _cairo_xlib_shm_surface_get_obdata (&clone->base);
+	    ximage.bytes_per_line = clone->stride;
+	} else {
+	    pixman_image = pixman_image_create_bits (intermediate_format,
+						     width, height, NULL, 0);
+	    if (pixman_image == NULL) {
+		status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
+		goto BAIL;
+	    }
+
+	    pixman_image_composite32 (PIXMAN_OP_SRC,
+				      image->pixman_image,
+				      NULL,
+				      pixman_image,
+				      src_x, src_y,
+				      0, 0,
+				      0, 0,
+				      width, height);
+
+	    ximage.data = (char *) pixman_image_get_data (pixman_image);
+	    ximage.bytes_per_line = pixman_image_get_stride (pixman_image);
+	}
 
 	ximage.width = width;
 	ximage.height = height;
 	ximage.bits_per_pixel = image_masks.bpp;
-	ximage.data = (char *) pixman_image_get_data (pixman_image);
-	ximage.bytes_per_line = pixman_image_get_stride (pixman_image);
 
 	ret = XInitImage (&ximage);
 	assert (ret != 0);
@@ -1195,7 +1248,6 @@ _cairo_xlib_surface_draw_image (cairo_xlib_surface_t   *surface,
 	ximage.bytes_per_line = stride;
 	ximage.data = _cairo_malloc_ab (stride, ximage.height);
 	if (unlikely (ximage.data == NULL)) {
-            own_data = FALSE;
 	    status = _cairo_error (CAIRO_STATUS_NO_MEMORY);
             goto BAIL;
         }
@@ -1296,7 +1348,7 @@ _cairo_xlib_surface_draw_image (cairo_xlib_surface_t   *surface,
 
     if (ximage.obdata)
 	XShmPutImage (display->display, surface->drawable, gc, &ximage,
-		      src_x, src_y, dst_x, dst_y, width, height, TRUE);
+		      src_x, src_y, dst_x, dst_y, width, height, True);
     else
 	XPutImage (display->display, surface->drawable, gc, &ximage,
 		   src_x, src_y, dst_x, dst_y, width, height);
@@ -1308,6 +1360,8 @@ _cairo_xlib_surface_draw_image (cairo_xlib_surface_t   *surface,
 
     if (own_data)
 	free (ximage.data);
+    if (shm_image)
+	cairo_surface_destroy (shm_image);
     if (pixman_image)
         pixman_image_unref (pixman_image);
 
@@ -1744,7 +1798,8 @@ found:
     _cairo_surface_init (&surface->base,
 			 &cairo_xlib_surface_backend,
 			 screen->device,
-			 _xrender_format_to_content (xrender_format));
+			 _xrender_format_to_content (xrender_format),
+			 FALSE); /* is_vector */
 
     surface->screen = screen;
     surface->compositor = display->compositor;

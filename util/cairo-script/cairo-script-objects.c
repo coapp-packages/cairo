@@ -32,6 +32,8 @@
  *	Chris Wilson <chris@chris-wilson.co.uk>
  */
 
+#include "config.h"
+
 #include "cairo-script-private.h"
 
 #include <limits.h> /* INT_MAX */
@@ -508,6 +510,7 @@ csi_string_new (csi_t *ctx,
     }
     string->len = len;
     string->deflate = 0;
+    string->method = NONE;
 
     string->base.type = CSI_OBJECT_TYPE_STRING;
     string->base.ref = 1;
@@ -534,6 +537,7 @@ csi_string_deflate_new (csi_t *ctx,
 
     string = obj->datum.string;
     string->deflate = out_len;
+    string->method = ZLIB;
 
     return CSI_STATUS_SUCCESS;
 }
@@ -556,6 +560,7 @@ csi_string_new_from_bytes (csi_t *ctx,
     string->string = bytes;
     string->len = len;
     string->deflate = 0;
+    string->method = NONE;
 
     string->base.type = CSI_OBJECT_TYPE_STRING;
     string->base.ref = 1;

@@ -93,8 +93,9 @@
 
 /* VBO size that we allocate, smaller size means we gotta flush more often,
  * but larger means hogging more memory and can cause trouble for drivers
- * (especially on embedded devices). */
-#define CAIRO_GL_VBO_SIZE (16*1024)
+ * (especially on embedded devices). Use the CAIRO_GL_VBO_SIZE environment
+ * variable to set this to a different size. */
+#define CAIRO_GL_VBO_SIZE_DEFAULT (1024*1024)
 
 typedef struct _cairo_gl_surface cairo_gl_surface_t;
 
@@ -102,7 +103,7 @@ typedef struct _cairo_gl_surface cairo_gl_surface_t;
 typedef enum cairo_gl_flavor {
     CAIRO_GL_FLAVOR_NONE = 0,
     CAIRO_GL_FLAVOR_DESKTOP = 1,
-    CAIRO_GL_FLAVOR_ES = 2
+    CAIRO_GL_FLAVOR_ES2 = 2
 } cairo_gl_flavor_t;
 
 /* Indices for vertex attributes used by BindAttribLocation etc */
@@ -136,6 +137,7 @@ typedef struct cairo_gl_operand {
 	    cairo_gl_surface_t *surface;
 	    cairo_gl_surface_t *owns_surface;
 	    cairo_surface_attributes_t attributes;
+	    int texgen;
 	} texture;
 	struct {
 	    GLfloat color[4];
@@ -146,6 +148,7 @@ typedef struct cairo_gl_operand {
 	    cairo_circle_double_t circle_d;
 	    double radius_0, a;
 	    cairo_extend_t extend;
+	    int texgen;
 	} gradient;
     };
     unsigned int vertex_offset;
@@ -177,6 +180,7 @@ struct _cairo_gl_surface {
     cairo_bool_t supports_msaa;
     cairo_bool_t msaa_active; /* Whether the multisampling
 			         framebuffer is active or not. */
+    cairo_clip_t *clip_on_stencil_buffer;
 
     int owns_tex;
     cairo_bool_t needs_update;
@@ -198,6 +202,13 @@ typedef enum cairo_gl_tex {
 typedef struct cairo_gl_shader {
     GLuint fragment_shader;
     GLuint program;
+    GLint mvp_location;
+    GLint constant_location[2];
+    GLint a_location[2];
+    GLint circle_d_location[2];
+    GLint radius_0_location[2];
+    GLint texdims_location[2];
+    GLint texgen_location[2];
 } cairo_gl_shader_t;
 
 typedef enum cairo_gl_shader_in {
@@ -211,6 +222,7 @@ typedef enum cairo_gl_shader_in {
 typedef enum cairo_gl_var_type {
   CAIRO_GL_VAR_NONE,
   CAIRO_GL_VAR_TEXCOORDS,
+  CAIRO_GL_VAR_TEXGEN,
 } cairo_gl_var_type_t;
 
 typedef enum cairo_gl_primitive_type {
@@ -218,8 +230,23 @@ typedef enum cairo_gl_primitive_type {
     CAIRO_GL_PRIMITIVE_TYPE_TRISTRIPS
 } cairo_gl_primitive_type_t;
 
-#define cairo_gl_var_type_hash(src,mask,spans,dest) ((spans) << 3) | ((mask) << 2 | (src << 1) | (dest))
-#define CAIRO_GL_VAR_TYPE_MAX ((CAIRO_GL_VAR_TEXCOORDS << 3) | (CAIRO_GL_VAR_TEXCOORDS << 2) | (CAIRO_GL_VAR_TEXCOORDS << 1) | CAIRO_GL_VAR_TEXCOORDS)
+typedef void (*cairo_gl_emit_rect_t) (cairo_gl_context_t *ctx,
+				      GLfloat x1, GLfloat y1,
+				      GLfloat x2, GLfloat y2);
+
+typedef void (*cairo_gl_emit_span_t) (cairo_gl_context_t *ctx,
+				      GLfloat x1, GLfloat y1,
+				      GLfloat x2, GLfloat y2,
+				      uint8_t alpha);
+
+typedef void (*cairo_gl_emit_glyph_t) (cairo_gl_context_t *ctx,
+				       GLfloat x1, GLfloat y1,
+				       GLfloat x2, GLfloat y2,
+				       GLfloat glyph_x1, GLfloat glyph_y1,
+				       GLfloat glyph_x2, GLfloat glyph_y2);
+
+#define cairo_gl_var_type_hash(src,mask,spans,dest) ((spans) << 5) | ((mask) << 3 | (src << 1) | (dest))
+#define CAIRO_GL_VAR_TYPE_MAX (1 << 6)
 
 typedef void (*cairo_gl_generic_func_t)(void);
 typedef cairo_gl_generic_func_t (*cairo_gl_get_proc_addr_func_t)(const char *procname);
@@ -318,7 +345,7 @@ struct _cairo_gl_context {
 
     cairo_bool_t has_shader_support;
 
-    GLuint vertex_shaders[CAIRO_GL_VAR_TYPE_MAX + 1];
+    GLuint vertex_shaders[CAIRO_GL_VAR_TYPE_MAX];
     cairo_gl_shader_t fill_rectangles_shader;
     cairo_cache_t shaders;
 
@@ -335,6 +362,7 @@ struct _cairo_gl_context {
     cairo_gl_operand_t operands[2];
     cairo_bool_t spans;
 
+    unsigned int vbo_size;
     unsigned int vb_offset;
     unsigned int vertex_size;
     cairo_region_t *clip_region;
@@ -350,6 +378,7 @@ struct _cairo_gl_context {
     cairo_bool_t has_map_buffer;
     cairo_bool_t has_packed_depth_stencil;
     cairo_bool_t has_npot_repeat;
+    cairo_bool_t can_read_bgra;
 
     cairo_bool_t thread_aware;
 
@@ -371,6 +400,7 @@ typedef struct _cairo_gl_composite {
     cairo_bool_t spans;
 
     cairo_clip_t *clip;
+    cairo_bool_t multisample;
 } cairo_gl_composite_t;
 
 typedef struct _cairo_gl_font {
@@ -416,7 +446,11 @@ _cairo_gl_surface_draw_image (cairo_gl_surface_t *dst,
 			      cairo_image_surface_t *src,
 			      int src_x, int src_y,
 			      int width, int height,
-			      int dst_x, int dst_y);
+			      int dst_x, int dst_y,
+			      cairo_bool_t force_flush);
+
+cairo_private cairo_int_status_t
+_cairo_gl_surface_resolve_multisampling (cairo_gl_surface_t *surface);
 
 static cairo_always_inline cairo_bool_t
 _cairo_gl_device_has_glsl (cairo_device_t *device)
@@ -467,13 +501,28 @@ _cairo_gl_context_release (cairo_gl_context_t *ctx, cairo_status_t status)
 }
 
 cairo_private void
-_cairo_gl_activate_surface_as_nonmultisampling (cairo_gl_context_t *ctx,
-						cairo_gl_surface_t *surface);
-
-cairo_private void
 _cairo_gl_context_set_destination (cairo_gl_context_t *ctx,
 				   cairo_gl_surface_t *surface,
 				   cairo_bool_t multisampling);
+
+cairo_private void
+_cairo_gl_context_bind_framebuffer (cairo_gl_context_t *ctx,
+				    cairo_gl_surface_t *surface,
+				    cairo_bool_t multisampling);
+
+cairo_private cairo_gl_emit_rect_t
+_cairo_gl_context_choose_emit_rect (cairo_gl_context_t *ctx);
+
+cairo_private void
+_cairo_gl_context_emit_rect (cairo_gl_context_t *ctx,
+			     GLfloat x1, GLfloat y1,
+			     GLfloat x2, GLfloat y2);
+
+cairo_private cairo_gl_emit_span_t
+_cairo_gl_context_choose_emit_span (cairo_gl_context_t *ctx);
+
+cairo_private cairo_gl_emit_glyph_t
+_cairo_gl_context_choose_emit_glyph (cairo_gl_context_t *ctx);
 
 cairo_private void
 _cairo_gl_context_activate (cairo_gl_context_t *ctx,
@@ -495,6 +544,11 @@ _cairo_gl_composite_init (cairo_gl_composite_t *setup,
 cairo_private void
 _cairo_gl_composite_fini (cairo_gl_composite_t *setup);
 
+cairo_private cairo_status_t
+_cairo_gl_composite_set_operator (cairo_gl_composite_t *setup,
+				  cairo_operator_t op,
+				  cairo_bool_t assume_component_alpha);
+
 cairo_private void
 _cairo_gl_composite_set_clip_region (cairo_gl_composite_t *setup,
                                      cairo_region_t *clip_region);
@@ -505,9 +559,10 @@ _cairo_gl_composite_set_clip(cairo_gl_composite_t *setup,
 
 cairo_private cairo_int_status_t
 _cairo_gl_composite_set_source (cairo_gl_composite_t *setup,
-			        const cairo_pattern_t *pattern,
+				const cairo_pattern_t *pattern,
 				const cairo_rectangle_int_t *sample,
-				const cairo_rectangle_int_t *extents);
+				const cairo_rectangle_int_t *extents,
+				cairo_bool_t use_texgen);
 
 cairo_private void
 _cairo_gl_composite_set_solid_source (cairo_gl_composite_t *setup,
@@ -521,7 +576,8 @@ cairo_private cairo_int_status_t
 _cairo_gl_composite_set_mask (cairo_gl_composite_t *setup,
 			      const cairo_pattern_t *pattern,
 			      const cairo_rectangle_int_t *sample,
-			      const cairo_rectangle_int_t *extents);
+			      const cairo_rectangle_int_t *extents,
+			      cairo_bool_t use_texgen);
 
 cairo_private void
 _cairo_gl_composite_set_mask_operand (cairo_gl_composite_t *setup,
@@ -530,33 +586,16 @@ _cairo_gl_composite_set_mask_operand (cairo_gl_composite_t *setup,
 cairo_private void
 _cairo_gl_composite_set_spans (cairo_gl_composite_t *setup);
 
+cairo_private void
+_cairo_gl_composite_set_multisample (cairo_gl_composite_t *setup);
+
 cairo_private cairo_status_t
 _cairo_gl_composite_begin (cairo_gl_composite_t *setup,
                            cairo_gl_context_t **ctx);
 
 cairo_private cairo_status_t
-_cairo_gl_composite_begin_multisample (cairo_gl_composite_t *setup,
-				       cairo_gl_context_t **ctx_out,
-				       cairo_bool_t multisampling);
-
-cairo_private void
-_cairo_gl_composite_emit_rect (cairo_gl_context_t *ctx,
-                               GLfloat x1,
-                               GLfloat y1,
-                               GLfloat x2,
-                               GLfloat y2,
-                               uint8_t alpha);
-
-cairo_private void
-_cairo_gl_composite_emit_glyph (cairo_gl_context_t *ctx,
-                                GLfloat x1,
-                                GLfloat y1,
-                                GLfloat x2,
-                                GLfloat y2,
-                                GLfloat glyph_x1,
-                                GLfloat glyph_y1,
-                                GLfloat glyph_x2,
-                                GLfloat glyph_y2);
+_cairo_gl_set_operands_and_operator (cairo_gl_composite_t *setup,
+				     cairo_gl_context_t *ctx);
 
 cairo_private void
 _cairo_gl_composite_flush (cairo_gl_context_t *ctx);
@@ -621,35 +660,35 @@ _cairo_gl_get_shader_by_type (cairo_gl_context_t *ctx,
 
 cairo_private void
 _cairo_gl_shader_bind_float (cairo_gl_context_t *ctx,
-			     const char *name,
+			     GLint location,
 			     float value);
 
 cairo_private void
 _cairo_gl_shader_bind_vec2 (cairo_gl_context_t *ctx,
-			    const char *name,
+			    GLint location,
 			    float value0, float value1);
 
 cairo_private void
 _cairo_gl_shader_bind_vec3 (cairo_gl_context_t *ctx,
-			    const char *name,
+			    GLint location,
 			    float value0,
 			    float value1,
 			    float value2);
 
 cairo_private void
 _cairo_gl_shader_bind_vec4 (cairo_gl_context_t *ctx,
-			    const char *name,
+			    GLint location,
 			    float value0, float value1,
 			    float value2, float value3);
 
 cairo_private void
 _cairo_gl_shader_bind_matrix (cairo_gl_context_t *ctx,
-			      const char *name,
-			      cairo_matrix_t* m);
+			      GLint location,
+			      const cairo_matrix_t* m);
 
 cairo_private void
 _cairo_gl_shader_bind_matrix4f (cairo_gl_context_t *ctx,
-				const char *name,
+				GLint location,
 				GLfloat* gl_m);
 
 cairo_private void
@@ -665,6 +704,9 @@ _cairo_gl_get_version (void);
 cairo_private cairo_gl_flavor_t
 _cairo_gl_get_flavor (void);
 
+cairo_private unsigned long
+_cairo_gl_get_vbo_size (void);
+
 cairo_private cairo_bool_t
 _cairo_gl_has_extension (const char *ext);
 
@@ -677,7 +719,8 @@ _cairo_gl_operand_init (cairo_gl_operand_t *operand,
 		        const cairo_pattern_t *pattern,
 		        cairo_gl_surface_t *dst,
 			const cairo_rectangle_int_t *sample,
-			const cairo_rectangle_int_t *extents);
+			const cairo_rectangle_int_t *extents,
+			cairo_bool_t use_texgen);
 
 cairo_private void
 _cairo_gl_solid_operand_init (cairo_gl_operand_t *operand,
@@ -693,7 +736,7 @@ cairo_private cairo_extend_t
 _cairo_gl_operand_get_extend (cairo_gl_operand_t *operand);
 
 cairo_private unsigned int
-_cairo_gl_operand_get_vertex_size (cairo_gl_operand_type_t type);
+_cairo_gl_operand_get_vertex_size (const cairo_gl_operand_t *operand);
 
 cairo_private cairo_bool_t
 _cairo_gl_operand_needs_setup (cairo_gl_operand_t *dest,
@@ -765,6 +808,12 @@ _cairo_gl_surface_create_scratch (cairo_gl_context_t   *ctx,
 				  int			height);
 
 cairo_private cairo_surface_t *
+_cairo_gl_surface_create_scratch_for_caching (cairo_gl_context_t *ctx,
+					      cairo_content_t content,
+					      int width,
+					      int height);
+
+cairo_private cairo_surface_t *
 _cairo_gl_pattern_to_source (cairo_surface_t *dst,
 			     const cairo_pattern_t *pattern,
 			     cairo_bool_t is_mask,
@@ -779,6 +828,10 @@ _cairo_gl_msaa_compositor_draw_clip (cairo_gl_context_t *ctx,
 
 cairo_private cairo_surface_t *
 _cairo_gl_white_source (void);
+
+cairo_private void
+_cairo_gl_scissor_to_rectangle (cairo_gl_surface_t *surface,
+				const cairo_rectangle_int_t *r);
 
 static inline cairo_gl_operand_t *
 source_to_operand (cairo_surface_t *surface)

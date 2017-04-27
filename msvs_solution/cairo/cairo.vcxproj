@@ -1,0 +1,308 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{89D68AF8-5CBC-43FF-B9ED-9D7B2A064036}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>cairo</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../src;../config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../src;../config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../src;../config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../src;../config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\cairo-analysis-surface.c" />
+    <ClCompile Include="..\..\src\cairo-arc.c" />
+    <ClCompile Include="..\..\src\cairo-array.c" />
+    <ClCompile Include="..\..\src\cairo-atomic.c" />
+    <ClCompile Include="..\..\src\cairo-base64-stream.c" />
+    <ClCompile Include="..\..\src\cairo-base85-stream.c" />
+    <ClCompile Include="..\..\src\cairo-bentley-ottmann-rectangular.c" />
+    <ClCompile Include="..\..\src\cairo-bentley-ottmann-rectilinear.c" />
+    <ClCompile Include="..\..\src\cairo-bentley-ottmann.c" />
+    <ClCompile Include="..\..\src\cairo-botor-scan-converter.c" />
+    <ClCompile Include="..\..\src\cairo-boxes-intersect.c" />
+    <ClCompile Include="..\..\src\cairo-boxes.c" />
+    <ClCompile Include="..\..\src\cairo-cache.c" />
+    <ClCompile Include="..\..\src\cairo-cff-subset.c" />
+    <ClCompile Include="..\..\src\cairo-clip-boxes.c" />
+    <ClCompile Include="..\..\src\cairo-clip-polygon.c" />
+    <ClCompile Include="..\..\src\cairo-clip-region.c" />
+    <ClCompile Include="..\..\src\cairo-clip-surface.c" />
+    <ClCompile Include="..\..\src\cairo-clip-tor-scan-converter.c" />
+    <ClCompile Include="..\..\src\cairo-clip.c" />
+    <ClCompile Include="..\..\src\cairo-color.c" />
+    <ClCompile Include="..\..\src\cairo-composite-rectangles.c" />
+    <ClCompile Include="..\..\src\cairo-compositor.c" />
+    <ClCompile Include="..\..\src\cairo-contour.c" />
+    <ClCompile Include="..\..\src\cairo-damage.c" />
+    <ClCompile Include="..\..\src\cairo-debug.c" />
+    <ClCompile Include="..\..\src\cairo-default-context.c" />
+    <ClCompile Include="..\..\src\cairo-deflate-stream.c" />
+    <ClCompile Include="..\..\src\cairo-device.c" />
+    <ClCompile Include="..\..\src\cairo-error.c" />
+    <ClCompile Include="..\..\src\cairo-fallback-compositor.c" />
+    <ClCompile Include="..\..\src\cairo-fixed.c" />
+    <ClCompile Include="..\..\src\cairo-font-face-twin-data.c" />
+    <ClCompile Include="..\..\src\cairo-font-face-twin.c" />
+    <ClCompile Include="..\..\src\cairo-font-face.c" />
+    <ClCompile Include="..\..\src\cairo-font-options.c" />
+    <ClCompile Include="..\..\src\cairo-freed-pool.c" />
+    <ClCompile Include="..\..\src\cairo-freelist.c" />
+    <ClCompile Include="..\..\src\cairo-gstate.c" />
+    <ClCompile Include="..\..\src\cairo-hash.c" />
+    <ClCompile Include="..\..\src\cairo-hull.c" />
+    <ClCompile Include="..\..\src\cairo-image-compositor.c" />
+    <ClCompile Include="..\..\src\cairo-image-info.c" />
+    <ClCompile Include="..\..\src\cairo-image-source.c" />
+    <ClCompile Include="..\..\src\cairo-image-surface.c" />
+    <ClCompile Include="..\..\src\cairo-line.c" />
+    <ClCompile Include="..\..\src\cairo-lzw.c" />
+    <ClCompile Include="..\..\src\cairo-mask-compositor.c" />
+    <ClCompile Include="..\..\src\cairo-matrix.c" />
+    <ClCompile Include="..\..\src\cairo-mempool.c" />
+    <ClCompile Include="..\..\src\cairo-mesh-pattern-rasterizer.c" />
+    <ClCompile Include="..\..\src\cairo-misc.c" />
+    <ClCompile Include="..\..\src\cairo-mono-scan-converter.c" />
+    <ClCompile Include="..\..\src\cairo-mutex.c" />
+    <ClCompile Include="..\..\src\cairo-no-compositor.c" />
+    <ClCompile Include="..\..\src\cairo-observer.c" />
+    <ClCompile Include="..\..\src\cairo-output-stream.c" />
+    <ClCompile Include="..\..\src\cairo-paginated-surface.c" />
+    <ClCompile Include="..\..\src\cairo-path-bounds.c" />
+    <ClCompile Include="..\..\src\cairo-path-fill.c" />
+    <ClCompile Include="..\..\src\cairo-path-fixed.c" />
+    <ClCompile Include="..\..\src\cairo-path-in-fill.c" />
+    <ClCompile Include="..\..\src\cairo-path-stroke-boxes.c" />
+    <ClCompile Include="..\..\src\cairo-path-stroke-polygon.c" />
+    <ClCompile Include="..\..\src\cairo-path-stroke-traps.c" />
+    <ClCompile Include="..\..\src\cairo-path-stroke-tristrip.c" />
+    <ClCompile Include="..\..\src\cairo-path-stroke.c" />
+    <ClCompile Include="..\..\src\cairo-path.c" />
+    <ClCompile Include="..\..\src\cairo-pattern.c" />
+    <ClCompile Include="..\..\src\cairo-pdf-interchange.c" />
+    <ClCompile Include="..\..\src\cairo-pdf-operators.c" />
+    <ClCompile Include="..\..\src\cairo-pdf-shading.c" />
+    <ClCompile Include="..\..\src\cairo-pdf-surface.c" />
+    <ClCompile Include="..\..\src\cairo-pen.c" />
+    <ClCompile Include="..\..\src\cairo-png.c" />
+    <ClCompile Include="..\..\src\cairo-polygon-intersect.c" />
+    <ClCompile Include="..\..\src\cairo-polygon-reduce.c" />
+    <ClCompile Include="..\..\src\cairo-polygon.c" />
+    <ClCompile Include="..\..\src\cairo-ps-surface.c" />
+    <ClCompile Include="..\..\src\cairo-raster-source-pattern.c" />
+    <ClCompile Include="..\..\src\cairo-recording-surface.c" />
+    <ClCompile Include="..\..\src\cairo-rectangle.c" />
+    <ClCompile Include="..\..\src\cairo-rectangular-scan-converter.c" />
+    <ClCompile Include="..\..\src\cairo-region.c" />
+    <ClCompile Include="..\..\src\cairo-rtree.c" />
+    <ClCompile Include="..\..\src\cairo-scaled-font-subsets.c" />
+    <ClCompile Include="..\..\src\cairo-scaled-font.c" />
+    <ClCompile Include="..\..\src\cairo-script-surface.c" />
+    <ClCompile Include="..\..\src\cairo-shape-mask-compositor.c" />
+    <ClCompile Include="..\..\src\cairo-slope.c" />
+    <ClCompile Include="..\..\src\cairo-spans-compositor.c" />
+    <ClCompile Include="..\..\src\cairo-spans.c" />
+    <ClCompile Include="..\..\src\cairo-spline.c" />
+    <ClCompile Include="..\..\src\cairo-stroke-dash.c" />
+    <ClCompile Include="..\..\src\cairo-stroke-style.c" />
+    <ClCompile Include="..\..\src\cairo-surface-clipper.c" />
+    <ClCompile Include="..\..\src\cairo-surface-fallback.c" />
+    <ClCompile Include="..\..\src\cairo-surface-observer.c" />
+    <ClCompile Include="..\..\src\cairo-surface-offset.c" />
+    <ClCompile Include="..\..\src\cairo-surface-snapshot.c" />
+    <ClCompile Include="..\..\src\cairo-surface-subsurface.c" />
+    <ClCompile Include="..\..\src\cairo-surface-wrapper.c" />
+    <ClCompile Include="..\..\src\cairo-surface.c" />
+    <ClCompile Include="..\..\src\cairo-svg-surface.c" />
+    <ClCompile Include="..\..\src\cairo-tag-attributes.c" />
+    <ClCompile Include="..\..\src\cairo-tag-stack.c" />
+    <ClCompile Include="..\..\src\cairo-time.c" />
+    <ClCompile Include="..\..\src\cairo-tor-scan-converter.c" />
+    <ClCompile Include="..\..\src\cairo-tor22-scan-converter.c" />
+    <ClCompile Include="..\..\src\cairo-toy-font-face.c" />
+    <ClCompile Include="..\..\src\cairo-traps-compositor.c" />
+    <ClCompile Include="..\..\src\cairo-traps.c" />
+    <ClCompile Include="..\..\src\cairo-tristrip.c" />
+    <ClCompile Include="..\..\src\cairo-truetype-subset.c" />
+    <ClCompile Include="..\..\src\cairo-type1-fallback.c" />
+    <ClCompile Include="..\..\src\cairo-type1-glyph-names.c" />
+    <ClCompile Include="..\..\src\cairo-type1-subset.c" />
+    <ClCompile Include="..\..\src\cairo-type3-glyph-surface.c" />
+    <ClCompile Include="..\..\src\cairo-unicode.c" />
+    <ClCompile Include="..\..\src\cairo-user-font.c" />
+    <ClCompile Include="..\..\src\cairo-version.c" />
+    <ClCompile Include="..\..\src\cairo-wideint.c" />
+    <ClCompile Include="..\..\src\cairo.c" />
+    <ClCompile Include="..\..\src\win32\cairo-win32-debug.c" />
+    <ClCompile Include="..\..\src\win32\cairo-win32-device.c" />
+    <ClCompile Include="..\..\src\win32\cairo-win32-display-surface.c" />
+    <ClCompile Include="..\..\src\win32\cairo-win32-font.c" />
+    <ClCompile Include="..\..\src\win32\cairo-win32-gdi-compositor.c" />
+    <ClCompile Include="..\..\src\win32\cairo-win32-printing-surface.c" />
+    <ClCompile Include="..\..\src\win32\cairo-win32-surface.c" />
+    <ClCompile Include="..\..\src\win32\cairo-win32-system.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\cairo-line-inline.h" />
+    <ClInclude Include="..\..\src\cairo-line-private.h" />
+    <ClInclude Include="..\..\src\cairo-pixman-private.h" />
+    <ClInclude Include="..\..\src\cairo-tag-attributes-private.h" />
+    <ClInclude Include="..\..\src\cairo-tag-stack-private.h" />
+    <ClInclude Include="..\..\src\win32\cairo-win32-private.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets" Condition="Exists('..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets')" />
+    <Import Project="..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets" Condition="Exists('..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" />
+    <Import Project="..\packages\libpng.redist.1.6.28.1\build\native\libpng.redist.targets" Condition="Exists('..\packages\libpng.redist.1.6.28.1\build\native\libpng.redist.targets')" />
+    <Import Project="..\packages\pixman_static.0.32.4.4\build\native\pixman_static.targets" Condition="Exists('..\packages\pixman_static.0.32.4.4\build\native\pixman_static.targets')" />
+    <Import Project="..\packages\libpng.1.6.28.1\build\native\libpng.targets" Condition="Exists('..\packages\libpng.1.6.28.1\build\native\libpng.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets'))" />
+    <Error Condition="!Exists('..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets'))" />
+    <Error Condition="!Exists('..\packages\libpng.redist.1.6.28.1\build\native\libpng.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libpng.redist.1.6.28.1\build\native\libpng.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\pixman_static.0.32.4.4\build\native\pixman_static.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\pixman_static.0.32.4.4\build\native\pixman_static.targets'))" />
+    <Error Condition="!Exists('..\packages\libpng.1.6.28.1\build\native\libpng.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libpng.1.6.28.1\build\native\libpng.targets'))" />
+  </Target>
+</Project>
